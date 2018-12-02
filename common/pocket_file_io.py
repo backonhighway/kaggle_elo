@@ -2,9 +2,11 @@ import os, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 sys.path.append(ROOT)
 import pandas as pd
+import numpy as np
 from pandas.io.json import json_normalize
 from dask import dataframe as dd
 import json
+
 
 class GoldenCsv:
 
@@ -18,7 +20,15 @@ class GoldenCsv:
 
     @staticmethod
     def read_hdf(path):
-        pd.read_hdf(path)
+        return pd.read_hdf(path)
+
+    @staticmethod
+    def read_npy(path):
+        return np.load(path)
+
+    @staticmethod
+    def output_npy(arr, path):
+        np.save(path, arr)
 
     @staticmethod
     def output_csv(df, path):

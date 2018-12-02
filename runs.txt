@@ -1,0 +1,194 @@
+with object_id
+[103]	valid_0's multi_logloss: 1.44199
+
+without object_id
+[102]	valid_0's multi_logloss: 1.45142
+
+                 name  importance_split  importance_gain
+9               mwebv              6356            11593
+1                decl              6194             9733
+2               gal_l              5836             8712
+3               gal_b              5752             9586
+0                  ra              4754             7495
+5       hostgal_specz              4645            76489
+7  hostgal_photoz_err              3991            10983
+6      hostgal_photoz              2725            23420
+8             distmod              2224            12589
+4                 ddf               363             2164
+
+
+-------------------------------
+with agg
+Training until validation scores don't improve for 100 rounds.
+[100]   valid_0's multi_logloss: 0.634268
+[200]   valid_0's multi_logloss: 0.619945
+Early stopping, best iteration is:
+[152]   valid_0's multi_logloss: 0.609145
+
+                      name  importance_split  importance_gain
+5            hostgal_specz              4266            57073
+91         pass4_flux_skew              1321             5320
+6           hostgal_photoz              1300            17692
+72         pass3_flux_skew              1273             7317
+8                  distmod              1268            11058
+53         pass2_flux_skew              1260            11158
+47     pass1_detected_mean              1171            10718
+52       pass2_flux_median              1078             2770
+108        pass5_flux_mean              1072             3420
+
+-------------------------------
+without hostgal_specz
+Training until validation scores don't improve for 100 rounds.
+[100]   valid_0's multi_logloss: 0.693124
+[200]   valid_0's multi_logloss: 0.684953
+Early stopping, best iteration is:
+[147]   valid_0's multi_logloss: 0.670551
+                      name  importance_split  importance_gain
+5           hostgal_photoz              2728            49468
+7                  distmod              2086            21405
+52         pass2_flux_skew              1293            16269
+90         pass4_flux_skew              1288             5240
+71         pass3_flux_skew              1281             4420
+6       hostgal_photoz_err              1213            13699
+46     pass1_detected_mean              1081             9023
+107        pass5_flux_mean              1046             3301
+51       pass2_flux_median              1028             3365
+
+-------------------------------
+batch agg without specz
+[128]   valid_0's multi_logloss: 0.686579
+End training...
+                  name  importance_split  importance_gain
+5       hostgal_photoz              2863            49678
+7              distmod              2083            23970
+26         flux_2_skew              1690            17055
+32         flux_3_skew              1578             4871
+38         flux_4_skew              1473             4914
+-------------------------------
+batch agg with specz
+
+[148]   valid_0's multi_logloss: 0.628303
+End training...
+                  name  importance_split  importance_gain
+5        hostgal_specz              4501            57526
+--------------------------------
+agg2 with specz
+[145]	valid_0's multi_logloss: 0.587303
+End training...
+                                   name  importance_split  importance_gain
+5                         hostgal_specz              3666            57425
+8                               distmod              1140            10408
+6                        hostgal_photoz              1048            15707
+42                     pass_2_flux_skew               793            12025
+--------------------------------
+agg2 without
+[139]	valid_0's multi_logloss: 0.654413
+End training...
+                                   name  importance_split  importance_gain
+5                        hostgal_photoz              2534            55238
+7                               distmod              1988            16487
+6                    hostgal_photoz_err               800            10515
+41                     pass_2_flux_skew               700            11403
+--------------------------------
+with kernel mjd
+[141]	valid_0's multi_logloss: 0.630276
+End training...
+                                   name  importance_split  importance_gain
+5                        hostgal_photoz              2621            46166
+7                               distmod              2258            18512
+447                          kernel_mjd              1535            15336
+--------------------------------
+with hostgal
+[156]	valid_0's multi_logloss: 0.570011
+--------------------------------
+drop flux slope
+[141]	valid_0's multi_logloss: 0.580052
+--------------------------------
+drop flux slope, but not det flux slope
+[147]	valid_0's multi_logloss: 0.575782
+--------------------------------
+random drop specz
+[147]	valid_0's multi_logloss: 0.624615
+hostgal_specz,85,199
+--------------------------------
+with batch_agg
+[343]   valid_0's multi_logloss: 0.575712
+--------------------------------
+all aggs random_drop
+[148]   valid_0's multi_logloss: 0.619297
+-> 1.0928628481005243
+--------------------------------
+all aggs and batch_agg
+[142]   valid_0's multi_logloss: 0.618929
+-> 1.0853223356337314
+---------------------------------
+
+new metric(0.05)
+without all aggs
+1.0529694402238345
+---------------------------------
+with all aggs
+1.049630052283167
+---------------------------------
+with batch agg
+1.0495847957802673
+---------------------------------
+without det_flux_width?
+1.0488037698335493
+---------------------------------
+with pred from test
+[93]    valid_0's multi_logloss: 0.64973        valid_0's wloss: 1.04188
+                                   name  importance_split  importance_gain
+448                          kernel_mjd              1020            12912
+8                               distmod              1003             9625
+450       hostgal_photoz_pred_from_test               948            20492
+449        hostgal_specz_pred_from_test               931            15195
+6                        hostgal_photoz               917            17878
+451              distmod_pred_from_test               696             9806
+---------------------------------
+with pred from train and test
+[101]   valid_0's multi_logloss: 0.631615       valid_0's wloss: 1.03904
+---------------------------------
+with flue_err on det
+[102]   valid_0's multi_logloss: 0.635615       valid_0's wloss: 1.03083
+---------------------------------
+no median
+[100]   valid_0's multi_logloss: 0.639628       valid_0's wloss: 1.02364
+---------------------------------
+no det_0
+[92]    valid_0's multi_logloss: 0.647103       valid_0's wloss: 1.00882
+---------------------------------
+whoops added pred from train
+[106]   valid_0's multi_logloss: 0.631886       valid_0's wloss: 1.01728
+---------------------------------
+without mjd_diff
+[95]    valid_0's multi_logloss: 0.64722        valid_0's wloss: 1.00678
+---------------------------------
+without flux_slope
+[103]   valid_0's multi_logloss: 0.637573       valid_0's wloss: 0.994787
+---------------------------------
+without flux_diff
+[95]    valid_0's multi_logloss: 0.652196       valid_0's wloss: 0.984341
+
+---------------------------------
+dropped a lot
+[160 rows x 3 columns]
+[100]   valid_0's multi_logloss: 0.640251       valid_0's wloss: 0.978601
+---------------------------------
+with q_diff
+[103]   valid_0's multi_logloss: 0.637314       valid_0's wloss: 0.973295
+---------------------------------
+with more q_diff
+[103]   valid_0's multi_logloss: 0.632691       valid_0's wloss: 0.970775
+---------------------------------
+
+with flag
+[103]   valid_0's multi_logloss: 0.631334       valid_0's wloss: 0.964279
+---------------------------------
+with umap
+[101]   valid_0's multi_logloss: 0.641675       valid_0's wloss: 0.967488
+
+with kmeans
+[102]   valid_0's multi_logloss: 0.630752       valid_0's wloss: 0.966505
+---------------------------------
+
