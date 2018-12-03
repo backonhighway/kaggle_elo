@@ -1,9 +1,8 @@
-import numpy as np
-
 import os, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 sys.path.append(ROOT)
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
+import pandas as pd
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
@@ -28,25 +27,30 @@ batch_size = 512
 ev = pocket_eval.GoldenEval()
 
 checkPoint = ModelCheckpoint("./keras.model", monitor='val_loss', mode='min', save_best_only=True, verbose=0)
-es = EarlyStopping(monitor="val_loss", patience=50, verbose=1)
+es = EarlyStopping(monitor="val_loss", patience=30, verbose=1)
 
-_feats = train_.shape[1]
-num_feats = train_trans_num.shape[2]
-logger.print(meta_feats)
-model = pocket_network.build_bestfitting_nn(series_features=series_feats, meta_features=meta_feats)
+network = pocket_network.GoldenNetwork()
+model = network.build_bestfitting_nn()
 model.compile(loss="mean_squared_error", optimizer='adam', metrics=['accuracy'])
-history = model.fit([train_series_, train_meta_], [y_train],
-                    validation_data=[[holdout_series_, holdout_meta_], y_valid],
+
+train_in = [train_trans_cat, train_trans_num, train_[network.base_cat], train_[network.base_num]]
+hold_in = [hold_trans_cat, hold_trans_num, hold_[network.base_cat], hold_[network.base_num]]
+y_train, y_valid = train_["target"], hold_["target"]
+timer.time("start training...")
+
+history = model.fit(train_in, [y_train],
+                    validation_data=[hold_in, y_valid],
                     epochs=epochs,
                     batch_size=batch_size, shuffle=True, verbose=0,
-                    callbacks=[checkPoint])
-
+                    callbacks=[checkPoint, es])
 # plot_loss_acc(history)
 
 print('Loading Best Model')
 model.load_weights('./keras.model')
 # # Get predicted probabilities for each class
-y_pred = model.predict([holdout_series_, holdout_meta_], batch_size=batch_size)
+y_pred = model.predict(hold_in, batch_size=batch_size)
 logger.print(ev.rmse(y_valid, y_pred))
+history_ = pd.DataFrame(history.history)
+history_.to_csv("./history.csv")
 
 timer.time("done training")

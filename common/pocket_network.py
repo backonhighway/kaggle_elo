@@ -8,19 +8,27 @@ from keras.engine import Input
 class GoldenNetwork:
 
     def __init__(self):
+        self.base_num = ["elapsed_days"]
         self.base_cat = ['feature_1', 'feature_2', 'feature_3']
         self.base_cat_num = {
             "feature_1": (5, 3),
             "feature_2": (5, 3),
             "feature_3": (5, 3),
         }
-        self.base_num = ["elapsed_days"]
+
+        self.time_steps = 120
+        self.trans_num = ["purchase_amount", "installments", "purchase_date"]
+        self.trans_cat = ["most_recent_sales_range", "most_recent_purchases_range"]
+        self.trans_cat_num = {
+            "most_recent_sales_range": (5, 3),
+            "most_recent_purchases_range": (5, 3)
+        }
 
     def build_bestfitting_nn(self):
         cat_in = Input(shape=(len(self.base_cat),))
         cat_embeds = []
         for idx, col in enumerate(self.base_cat):
-            x = Lambda(lambda x: x[:, idx, None])(cat_in)
+            x = Lambda(lambda ci: ci[:, idx, None])(cat_in)
             x = Embedding(self.base_cat_num[col][0], self.base_cat_num[col][1], input_length=1)(x)
             cat_embeds.append(x)
         embeds = concatenate(cat_embeds, axis=2)
@@ -29,43 +37,44 @@ class GoldenNetwork:
         num_x = Reshape([1, len(self.base_num)])(num_in)
         b = concatenate([embeds, num_x], axis=2)
 
-
-        series_shape = (time_steps, series_features)
-
-        cat_in = Input(shape=(time_steps,))
-        c = Embedding(6, 4, input_length=time_steps)(cat_in)
-        c = GaussianDropout(0.2)(c)
-        ser_in = Input(shape=series_shape)
-        x = concatenate([ser_in, c], axis=2)
+        trans_cat_in = Input(shape=(self.time_steps, len(self.trans_cat)))
+        cat_embeds = []
+        for idx, col in enumerate(self.trans_cat):
+            x = Lambda(lambda ci: ci[:, idx, None])(trans_cat_in)
+            x = Embedding(self.trans_cat_num[col][0], self.trans_cat_num[col][1], input_length=1)(x)
+            cat_embeds.append(x)
+        embeds = concatenate(cat_embeds, axis=2)
+        embeds = GaussianDropout(0.2)(embeds)
+        trans_num_in = Input(shape=(self.time_steps, len(self.trans_num)))
+        t = concatenate([embeds, trans_num_in], axis=2)
 
         # xi = Input(shape=series_shape)
-        x = CuDNNGRU(256)(x)
-        x = BatchNormalization()(x)
-        x = Dropout(0.20)(x)
-        x = Dense(64)(x)
-        x = PReLU()(x)
-        x = BatchNormalization()(x)
-        x = Dropout(0.20)(x)
+        t = CuDNNGRU(256)(t)
+        t = BatchNormalization()(t)
+        t = Dropout(0.20)(t)
+        t = Dense(64)(t)
+        t = PReLU()(t)
+        t = BatchNormalization()(t)
+        t = Dropout(0.20)(t)
 
-        mi = Input(shape=(meta_features,))
-        m = Dense(256)(mi)
-        m = PReLU()(m)
-        m = BatchNormalization()(m)
-        m = Dropout(0.20)(m)
+        b = Dense(256)(b)
+        b = PReLU()(b)
+        b = BatchNormalization()(b)
+        b = Dropout(0.20)(b)
         # +0.33 for this layer, next one not much difference
-        m = Dense(128)(m)
-        m = PReLU()(m)
-        m = BatchNormalization()(m)
-        m = Dropout(0.20)(m)
+        b = Dense(128)(b)
+        b = PReLU()(b)
+        b = BatchNormalization()(b)
+        b = Dropout(0.20)(b)
 
-        c = concatenate([x, m])
+        c = concatenate([b, t])
         # adding a layer here -0.03
         c = Dense(32)(c)
         c = BatchNormalization()(c)
         c = Dropout(0.05)(c)
         op = Dense(14, activation="softmax")(c)
 
-        model = Model(inputs=[cat_in, ser_in, mi], output=op)
+        model = Model(inputs=[cat_in, num_in, trans_cat_in, trans_num_in], output=op)
         print(model.summary())
         return model
 #
