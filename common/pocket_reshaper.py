@@ -8,7 +8,7 @@ class GoldenReshaper:
     @staticmethod
     def reshape(df, use_col):
         sample_size = df["card_id"].nunique()
-        time_step = 300  # maximum length
+        time_step = 120  # maximum length
         features = len(use_col)
         ret_shape = (sample_size, time_step, features)
         ret_array = np.zeros(ret_shape)  # sample_size, time_step, features
