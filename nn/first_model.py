@@ -27,11 +27,11 @@ batch_size = 512
 ev = pocket_eval.GoldenEval()
 
 checkPoint = ModelCheckpoint("./keras.model", monitor='val_loss', mode='min', save_best_only=True, verbose=0)
-es = EarlyStopping(monitor="val_loss", patience=30, verbose=1)
+es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
 
 network = pocket_network.GoldenNetwork()
 model = network.build_bestfitting_nn()
-model.compile(loss="mean_squared_error", optimizer='adam', metrics=['accuracy'])
+model.compile(loss="mean_squared_error", optimizer='adam', metrics=['mae'])
 
 train_in = [train_trans_cat, train_trans_num, train_[network.base_cat], train_[network.base_num]]
 hold_in = [hold_trans_cat, hold_trans_num, hold_[network.base_cat], hold_[network.base_num]]

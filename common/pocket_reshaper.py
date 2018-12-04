@@ -1,9 +1,49 @@
 import pandas as pd
 import numpy as np
 import math
+from concurrent import futures
 
 
 class GoldenReshaper:
+
+    def __init__(self, split_num=16, cat_col=None, num_col=None):
+        self._SPLIT_NUM = split_num
+        self.cat_col = cat_col
+        self.num_col = num_col
+
+    def do_para_reshape(self, train_trans, hold_trans):
+        train_num, train_cat = self._do_para_reshape(train_trans)
+        hold_num, hold_cat = self._do_para_reshape(hold_trans)
+        return train_num, train_cat, hold_num, hold_cat
+
+    def _do_para_reshape(self, trans):
+        split_trans = self._split_series(trans)
+        future_list = list()
+        with futures.ProcessPoolExecutor(max_workers=self._SPLIT_NUM) as executor:
+            for s in split_trans:
+                future_list.append(executor.submit(self._do_reshape, s))
+        future_results = [f.result() for f in future_list]
+        num_list, cat_list = [f[0]for f in future_results], [f[1]for f in future_results]
+        ret_num_arr = np.concatenate(num_list, axis=0)
+        ret_cat_arr = np.concatenate(cat_list, axis=0)
+        print(ret_num_arr.shape)
+        print(ret_cat_arr.shape)
+        return ret_num_arr, ret_cat_arr
+
+    def _split_series(self, series):
+        series["id_mod"] = series["card_id"].apply(hash)
+        series["id_mod"] = series["id_mod"] % self._SPLIT_NUM
+
+        split_series = list()
+        for i in range(0, self._SPLIT_NUM):
+            one_split = series[series["id_mod"] == i]
+            split_series.append(one_split)
+        return split_series
+
+    def _do_reshape(self, trans):
+        trans_num = self.reshape(trans, self.num_col)
+        trans_cat = self.reshape(trans, self.cat_col)
+        return trans_num, trans_cat
 
     @staticmethod
     def reshape(df, use_col):

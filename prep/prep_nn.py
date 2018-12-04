@@ -33,13 +33,17 @@ train_id, holdout_id = train_["card_id"], holdout_["card_id"]
 train_trans_ = trans[trans["card_id"].isin(train_id)].copy()
 holdout_trans_ = trans[trans["card_id"].isin(holdout_id)].copy()
 
+timer.time("start reshape")
 from elo.common import pocket_reshaper
-reshaper = pocket_reshaper.GoldenReshaper()
+# reshaper = pocket_reshaper.GoldenReshaper()
+# trans_cat_col = [c for c in trans_no_scale_col if c != "card_id"]
+# train_trans_num = reshaper.reshape(train_trans_, trans_scale_col)
+# train_trans_cat = reshaper.reshape(train_trans_, trans_cat_col)
+# hold_trans_num = reshaper.reshape(holdout_trans_, trans_scale_col)
+# hold_trans_cat = reshaper.reshape(holdout_trans_, trans_cat_col)
 trans_cat_col = [c for c in trans_no_scale_col if c != "card_id"]
-train_trans_num = reshaper.reshape(train_trans_, trans_scale_col)
-train_trans_cat = reshaper.reshape(train_trans_, trans_cat_col)
-hold_trans_num = reshaper.reshape(holdout_trans_, trans_scale_col)
-hold_trans_cat = reshaper.reshape(holdout_trans_, trans_cat_col)
+reshaper = pocket_reshaper.GoldenReshaper(cat_col=trans_cat_col, num_col=trans_scale_col)
+train_trans_num, train_trans_cat, hold_trans_num, hold_trans_cat = reshaper.do_para_reshape(train_trans_, holdout_trans_)
 timer.time("prep data")
 
 csv_io.output_csv(train_, path_const.TRAIN_)
