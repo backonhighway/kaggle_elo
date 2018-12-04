@@ -19,7 +19,10 @@ class GoldenReshaper:
             df_ = df[df["card_id"] == the_key]
             res = df_[use_col].values
             desired = np.zeros(single_shape)
-            desired[:res.shape[0], :res.shape[1]] = res
+            if res.shape[0] > time_step:
+                desired = res[:time_step, :res.shape[1]]
+            else:
+                desired[:res.shape[0], :res.shape[1]] = res
             # print(desired)
             ret_array[i] = desired
 

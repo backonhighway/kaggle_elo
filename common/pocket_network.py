@@ -36,12 +36,13 @@ class GoldenNetwork:
         num_in = Input(shape=(len(self.base_num),))
         num_x = Reshape([1, len(self.base_num)])(num_in)
         b = concatenate([embeds, num_x], axis=2)
+        b = Flatten()(b)
 
         trans_cat_in = Input(shape=(self.time_steps, len(self.trans_cat)))
         cat_embeds = []
         for idx, col in enumerate(self.trans_cat):
-            x = Lambda(lambda ci: ci[:, idx, None])(trans_cat_in)
-            x = Embedding(self.trans_cat_num[col][0], self.trans_cat_num[col][1], input_length=1)(x)
+            x = Lambda(lambda ci: ci[:, :, idx])(trans_cat_in)
+            x = Embedding(self.trans_cat_num[col][0], self.trans_cat_num[col][1], input_length=self.time_steps)(x)
             cat_embeds.append(x)
         embeds = concatenate(cat_embeds, axis=2)
         embeds = GaussianDropout(0.2)(embeds)
@@ -72,9 +73,9 @@ class GoldenNetwork:
         c = Dense(32)(c)
         c = BatchNormalization()(c)
         c = Dropout(0.05)(c)
-        op = Dense(14, activation="softmax")(c)
+        op = Dense(1)(c)
 
-        model = Model(inputs=[cat_in, num_in, trans_cat_in, trans_num_in], output=op)
+        model = Model(inputs=[trans_cat_in, trans_num_in, cat_in, num_in], output=op)
         print(model.summary())
         return model
 #

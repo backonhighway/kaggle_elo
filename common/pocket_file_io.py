@@ -11,8 +11,8 @@ import json
 class GoldenCsv:
 
     @staticmethod
-    def read_file(path, nrows=None):
-        return pd.read_csv(path, nrows=nrows)
+    def read_file(path, nrows=None, parse_date=False):
+        return pd.read_csv(path, nrows=nrows, parse_dates=parse_date)
 
     @staticmethod
     def read_dask(path):

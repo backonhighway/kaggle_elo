@@ -6,14 +6,13 @@ import pandas as pd
 class PrepFe:
 
     def do_all(self, train, test, new, old, mer):
+        new["is_new"] = 1
+        old["is_new"] = 0
         train = self.do_for_both(train)
         test = self.do_for_both(test)
         new = self.do_transaction(new)
         old = self.do_transaction(old)
         mer = self.do_merchants(mer)
-        new["is_new"] = 1
-        old["is_new"] = 0
-
         trans = pd.concat([new, old], axis=0, ignore_index=True)
         trans = pd.merge(trans, mer, on="merchant_id", how="left")
         return train, test, trans
@@ -41,10 +40,10 @@ class PrepFe:
             print(col)
             lbl = preprocessing.LabelEncoder()
             lbl.fit(list(df[col].values.astype('str')))
-            df[col] = df.transform(list(df[col].values.astype('str')))
+            df[col] = lbl.transform(list(df[col].values.astype('str')))
         use_col = [
             "merchant_id", "merchant_category_id", "subsector_id",
-            "active_months_lag12", "average_purchases_lag12", "average_sales_lag12",
+            "active_months_lag12", "avg_purchases_lag12", "avg_sales_lag12",
             "most_recent_sales_range", "most_recent_purchases_range",
         ]
         return df[use_col]
@@ -60,15 +59,15 @@ class PrepFe:
         # key_cols = [
         #     "card_id", "merchant_id"
         # ]
-        df["hour_diff"] = df["purchase_date"].shift()
-        df["hour_diff"] = (df["hour_diff"] - df["purchase_date"]).dt.hour
+        # df["hour_diff"] = df["purchase_date"].shift()
+        # df["hour_diff"] = (df["hour_diff"] - df["purchase_date"]).dt.hour
         df["purchase_date"] =\
             (datetime.date(2018, 2, 1) - df['purchase_date'].dt.date).dt.days
 
         use_col = [
-            "card_id", "merchant_id"
+            "card_id", "merchant_id",
             "city_id", "state_id",  # "subsector_id"
-            "installments", "month_lag", "purchase_amount", "purchase_date", "hour_diff"
+            "installments", "month_lag", "purchase_amount", "purchase_date", # "hour_diff"
         ]
         return df[use_col]
 
