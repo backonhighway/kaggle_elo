@@ -2,7 +2,7 @@ import lightgbm as lgb
 import pandas as pd
 import numpy as np
 from . import pocket_logger
-from plastic.common import pred_cols, pocket_eval
+from elo.common import pred_cols
 
 
 class GoldenLgb:
@@ -19,19 +19,9 @@ class GoldenLgb:
             'verbose': 0,
         }
         self.target_col_name = "target"
-        if cat_col is not None:
-            self.category_col = cat_col
+        self.category_col = cat_col
         self.drop_cols = [
         ]
-
-    def do_train(self, train_data, test_data, predict_col):
-        tcn = self.target_col_name
-        y_train = train_data[tcn]
-        y_test = test_data[tcn]
-        x_train = train_data[predict_col].drop(self.drop_cols, axis=1)
-        x_test = test_data[predict_col].drop(self.drop_cols, axis=1)
-
-        return self.do_train_direct(x_train, x_test, y_train, y_test)
 
     def do_train_direct(self, x_train, x_test, y_train, y_test):
         lgb_train = lgb.Dataset(x_train, y_train)
@@ -44,7 +34,6 @@ class GoldenLgb:
                           verbose_eval=100,
                           num_boost_round=300,
                           early_stopping_rounds=100,
-                          feval=pocket_eval.GoldenEval.lgb_multi_weighted_logloss,
                           categorical_feature=self.category_col)
         print('End training...')
         return model
@@ -110,3 +99,4 @@ class AdversarialLgb:
                           categorical_feature=self.category_col)
         print('End training...')
         return model
+

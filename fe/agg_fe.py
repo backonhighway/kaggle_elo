@@ -1,5 +1,4 @@
 import pandas as pd
-from elo.common import pocket_timer
 
 
 class AggFe:
@@ -7,12 +6,8 @@ class AggFe:
         self.prefix = prefix
 
     def do_fe(self, df):
-        timer = pocket_timer.GoldenTimer()
-        timer.time("start prep")
         df = self.do_prep(df)
-        timer.time("start agg")
         grouped = self.do_base_agg(df)
-        timer.time("done agg")
         return grouped
 
     @staticmethod

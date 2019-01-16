@@ -4,6 +4,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 APP_ROOT = os.path.join(ROOT, "elo")
 INPUT_DIR = os.path.join(APP_ROOT, "input")
 OUTPUT_DIR = os.path.join(APP_ROOT, "output")
+SUB_DIR = os.path.join(APP_ROOT, "sub")
 ORG_TRAIN = os.path.join(INPUT_DIR, "train.csv")
 ORG_TEST = os.path.join(INPUT_DIR, "test.csv")
 ORG_NEW_MERCHANTS = os.path.join(INPUT_DIR, "new_merchant_transactions.csv")
@@ -32,4 +33,15 @@ HT_CAT = os.path.join(NN_DIR, "ht_cat.npy")
 # For LGBM
 OLD_TRANS1 = os.path.join(INPUT_DIR, "old_trans1.csv")
 NEW_TRANS1 = os.path.join(INPUT_DIR, "new_trans1.csv")
+
+OUTPUT_SUB = os.path.join(SUB_DIR, "temp_sub.csv")
+OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
+
+FEATURE_GAIN = os.path.join(OUTPUT_DIR, "feature_gain.csv")
+
+
+
+
+
+
 
