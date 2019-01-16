@@ -20,7 +20,6 @@ TRANSACTIONS1 = os.path.join(INPUT_DIR, "transactions1.csv")
 CAT_ARR = os.path.join(INPUT_DIR, "cat_arr.npy")
 NUM_ARR = os.path.join(INPUT_DIR, "num_arr.npy")
 
-
 # For NN
 NN_DIR = os.path.join(OUTPUT_DIR, "nn")
 TRAIN_ = os.path.join(NN_DIR, "train_.csv")
@@ -29,3 +28,8 @@ TT_NUM = os.path.join(NN_DIR, "tt_num.npy")
 TT_CAT = os.path.join(NN_DIR, "tt_cat.npy")
 HT_NUM = os.path.join(NN_DIR, "ht_num.npy")
 HT_CAT = os.path.join(NN_DIR, "ht_cat.npy")
+
+# For LGBM
+OLD_TRANS1 = os.path.join(INPUT_DIR, "old_trans1.csv")
+NEW_TRANS1 = os.path.join(INPUT_DIR, "new_trans1.csv")
+

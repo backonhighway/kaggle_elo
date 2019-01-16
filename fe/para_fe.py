@@ -1,16 +1,14 @@
 import pandas as pd
 from concurrent import futures
-from . import agg_fe
-from ..common import pocket_timer
+from elo.fe import agg_fe
+from elo.common import pocket_timer
 
 
 class ParaFe:
 
-    def __init__(self, split_num=32, cat_col=None, num_col=None):
+    def __init__(self, split_num=32, prefix=""):
         self._SPLIT_NUM = split_num
-        self.cat_col = cat_col
-        self.num_col = num_col
-        self.fer = agg_fe.AggFe()
+        self.fer = agg_fe.AggFe(prefix)
         self.timer = pocket_timer.GoldenTimer()
 
     def do_para_fe(self, trans):
