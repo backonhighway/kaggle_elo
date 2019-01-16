@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 
+
 class AggFe:
     def __init__(self, prefix):
         self.prefix = prefix
