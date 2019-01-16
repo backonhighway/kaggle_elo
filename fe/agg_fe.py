@@ -9,11 +9,14 @@ class AggFe:
 
     def do_fe(self, df):
         df = self.do_prep(df)
-        grouped = self.do_base_agg(df)
+        grouped = self.do_base_agg(df, self.prefix)
         #pivoted = self.do_time_feats(df)
-        #ret_df = pd.merge(grouped, pivoted, on="card_id", how="inner")
-        return grouped
-        #return ret_df
+        mode_feats = self.do_mode_feats(df)
+        ret_df = pd.merge(grouped, mode_feats, on="card_id", how="left")
+        if self.prefix == "old":
+            recent = self.do_recent_feats(df)
+            ret_df = pd.merge(ret_df, recent)
+        return ret_df
 
     @staticmethod
     def do_prep(df):
@@ -27,7 +30,8 @@ class AggFe:
         # df["hour"] = np.where(df["hour"] <= 4, df["hour"]+24, df["hour"])
         return df
 
-    def do_base_agg(self, df):
+    @staticmethod
+    def do_base_agg(df, prefix):
         aggs = {
             "authorized_flag": ["mean"],
             "city_id": ["nunique"],  # maybe the most frequent one?
@@ -47,22 +51,41 @@ class AggFe:
             # "hour": ["mean"]
         }
         all_agg = df.groupby(["card_id"]).agg(aggs).reset_index()
-        cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        cols = ["_".join([prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
         all_agg.columns = ["card_id"] + cols
 
         # make ptp col
-        month_ptp = "_".join([self.prefix, "month_lag", "ptp"])
-        max_col = "_".join([self.prefix, "month_lag", "max"])
-        min_col = "_".join([self.prefix, "month_lag", "min"])
+        month_ptp = "_".join([prefix, "month_lag", "ptp"])
+        max_col = "_".join([prefix, "month_lag", "max"])
+        min_col = "_".join([prefix, "month_lag", "min"])
         all_agg[month_ptp] = all_agg[max_col] - all_agg[min_col]
 
-        month_ptp = "_".join([self.prefix, "trans_elapsed_days", "ptp"])
-        max_col = "_".join([self.prefix, "trans_elapsed_days", "max"])
-        min_col = "_".join([self.prefix, "trans_elapsed_days", "min"])
+        month_ptp = "_".join([prefix, "trans_elapsed_days", "ptp"])
+        max_col = "_".join([prefix, "trans_elapsed_days", "max"])
+        min_col = "_".join([prefix, "trans_elapsed_days", "min"])
         all_agg[month_ptp] = all_agg[max_col] - all_agg[min_col]
         # all_agg.drop(columns=[max_col, min_col], inplace=True)
 
         return all_agg
+
+    def do_mode_feats(self, df):
+        aggs = [
+            "merchant_id", "city_id", "merchant_category_id", "state_id", "subsector_id", "category_2"
+        ]
+        ret_df = None
+        for agg in aggs:
+            temp_df = df.groupby("card_id")[agg].apply(lambda x: x.mode().iat[0]).reset_index()
+            if ret_df is None:
+                ret_df = temp_df
+            else:
+                ret_df = pd.merge(ret_df, temp_df, on="card_id", how="left")
+
+        ret_df.columns = ["card_id"] + ["_".join([self.prefix, agg]) for agg in aggs]
+        return ret_df
+
+    def do_recent_feats(self, df):
+        recent_df = df[df["trans_elapsed_days"] <= 180]
+        return self.do_base_agg(recent_df, "recent")
 
     def do_time_feats(self, df):
         counter = df.groupby("card_id")["purchase_amount"].agg("count").reset_index()
