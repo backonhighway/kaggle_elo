@@ -24,9 +24,13 @@ test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
 
 train_y = train["target"]
-train_x = train.drop(columns=["card_id", "target"])
-test_x = test.drop(columns=["card_id"])
+train_x = train.drop(columns=["card_id", "target", "feature_1", "feature_2", "feature_3"])
+test_x = test.drop(columns=["card_id", "feature_1", "feature_2", "feature_3"])
 timer.time("prepare train in ")
+print(train_x.shape)
+print(train_y.shape)
+print(test_x.shape)
+
 
 submission = pd.DataFrame()
 submission["card_id"] = test["card_id"]
@@ -35,8 +39,8 @@ train_cv = pd.DataFrame()
 train_cv["card_id"] = train["card_id"]
 train_cv["cv_pred"] = 0
 
-bagging_num = 2
-split_num = 5
+bagging_num = 1
+split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.KFold(n_splits=split_num, shuffle=True, random_state=71 * bagging_index)
     lgb = pocket_lgb.GoldenLgb()
@@ -44,7 +48,7 @@ for bagging_index in range(bagging_num):
     models = []
     train_preds = []
     for train_index, test_index in skf.split(train):
-        X_train, X_test = train_x[train_index], train_x[test_index]
+        X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
         y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
