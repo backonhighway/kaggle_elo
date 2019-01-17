@@ -21,7 +21,7 @@ class EncodeFe:
         df["category_2"].fillna(-1, inplace=True)
 
         df["mer_id_pur"] = df.groupby("merchant_id")["purchase_amount"].transform("mean")
-        df["city_pur"] = df.groupby("city")["purchase_amount"].transform("mean")
+        df["city_pur"] = df.groupby("city_id")["purchase_amount"].transform("mean")
         df["mer_cat_pur"] = df.groupby("merchant_category_id")["purchase_amount"].transform("mean")
         df["sub_sec_pur"] = df.groupby("subsector_id")["purchase_amount"].transform("mean")
         return df

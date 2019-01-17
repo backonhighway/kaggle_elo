@@ -17,12 +17,19 @@ train = csv_io.read_file(path_const.TRAIN1)
 test = csv_io.read_file(path_const.TEST1)
 new_trans = csv_io.read_file(path_const.NEW_TRANS1)
 old_trans = csv_io.read_file(path_const.OLD_TRANS1)
+new_trans2 = csv_io.read_file(path_const.NEW_TRANS2)
+old_trans2 = csv_io.read_file(path_const.OLD_TRANS2)
 timer.time("load csv in ")
 
 train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
+train = pd.merge(train, new_trans2, on="card_id", how="left")
+train = pd.merge(train, old_trans2, on="card_id", how="left")
+
 test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
+test = pd.merge(test, new_trans2, on="card_id", how="left")
+test = pd.merge(test, old_trans2, on="card_id", how="left")
 
 train_y = train["target"]
 drop_col = [
