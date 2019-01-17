@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
 from elo.common import pocket_lgb
+from elo.utils import drop_col_util
 from sklearn import model_selection
 
 logger = pocket_logger.get_my_logger()
@@ -24,8 +25,17 @@ test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
 
 train_y = train["target"]
-train_x = train.drop(columns=["card_id", "target", "feature_1", "feature_2", "feature_3"])
-test_x = test.drop(columns=["card_id", "feature_1", "feature_2", "feature_3"])
+drop_col = [
+    "card_id", "target", "feature_1", "feature_2", "feature_3",
+    "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
+    "old_null_state", "new_null_state", "new_null_install", #"old_null_install",
+]
+# from elo.common import pred_cols
+# for c in pred_cols.CAT_COLS:
+#     train[c] = np.where(train[c] < 0, 0, train[c]+1)
+#     test[c] = np.where(test[c] < 0, 0, test[c]+1)
+train_x = drop_col_util.drop_col(train, drop_col)
+test_x = drop_col_util.drop_col(test, drop_col)
 timer.time("prepare train in ")
 print(train_x.shape)
 print(train_y.shape)
@@ -42,7 +52,7 @@ train_cv["cv_pred"] = 0
 bagging_num = 1
 split_num = 4
 for bagging_index in range(bagging_num):
-    skf = model_selection.KFold(n_splits=split_num, shuffle=True, random_state=71 * bagging_index)
+    skf = model_selection.KFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
     lgb = pocket_lgb.GoldenLgb()
     total_score = 0
     models = []

@@ -9,15 +9,17 @@ class AggFe:
 
     def do_fe(self, df):
         df = self.do_prep(df)
-        grouped = self.do_base_agg(df, self.prefix)
+        ret_df = self.do_base_agg(df, self.prefix)
         #pivoted = self.do_time_feats(df)
         mode_feats = self.do_mode_feats(df)
-        ret_df = pd.merge(grouped, mode_feats, on="card_id", how="left")
+        ret_df = pd.merge(ret_df, mode_feats, on="card_id", how="left")
+        nan_feats = self.do_nan_feats(df)
+        ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
         if self.prefix == "old":
-            recent = self.do_recent_feats(df)
-            ret_df = pd.merge(ret_df, recent)
-            repurchase = self.do_recent_feats(df)
-            ret_df = pd.merge(ret_df, repurchase)
+            #recent = self.do_recent_feats(df)
+            #ret_df = pd.merge(ret_df, recent)
+            repurchase = self.do_repurchase_rate(df)
+            ret_df = pd.merge(ret_df, repurchase, on="card_id", how="left")
         return ret_df
 
     @staticmethod
@@ -48,7 +50,7 @@ class AggFe:
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
             "trans_elapsed_days": ["mean", "std", "max", "min"],
-            "weekend": ["mean"]
+            # "weekend": ["mean"]
             # "dow": ["mean"],
             # "hour": ["mean"]
         }
@@ -66,17 +68,25 @@ class AggFe:
         max_col = "_".join([prefix, "trans_elapsed_days", "max"])
         min_col = "_".join([prefix, "trans_elapsed_days", "min"])
         all_agg[month_ptp] = all_agg[max_col] - all_agg[min_col]
-        # all_agg.drop(columns=[max_col, min_col], inplace=True)
 
         return all_agg
 
     def do_mode_feats(self, df):
         aggs = [
-            "merchant_id", "city_id", "merchant_category_id", "state_id", "subsector_id", "category_2"
+            "city_id", "merchant_category_id", "subsector_id"
         ]
         ret_df = None
+
+        def most_freq(series):
+            mode_series = series.mode()
+            try:
+                ret_value = mode_series.iat[0]
+            except IndexError:
+                ret_value = np.NaN
+            return ret_value
+
         for agg in aggs:
-            temp_df = df.groupby("card_id")[agg].apply(lambda x: x.mode().iat[0]).reset_index()
+            temp_df = df.groupby("card_id")[agg].apply(lambda x: most_freq(x)).reset_index()
             if ret_df is None:
                 ret_df = temp_df
             else:
@@ -85,20 +95,26 @@ class AggFe:
         ret_df.columns = ["card_id"] + ["_".join([self.prefix, agg]) for agg in aggs]
         return ret_df
 
+    def do_nan_feats(self, df):
+        ret_df = df.groupby("card_id")[["category_2", "category_3"]]\
+            .apply(lambda s: s.isna().sum()).reset_index()
+        ret_df.columns = ["card_id", self.prefix + "_null_install", self.prefix + "_null_state"]
+        return ret_df
+
     @staticmethod
     def do_recent_feats(df):
         recent_df = df[df["trans_elapsed_days"] <= 180]
         aggs = {
-            "installments": ["mean", "sum"],
+            "installments": ["sum"],
             "merchant_id": ["nunique"],
-            "purchase_amount": ["max", "min", "mean", "std", "count", "skew", "sum"],
+            "purchase_amount": ["mean", "count", "sum"],
         }
         all_agg = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
         cols = ["_".join(["recent", k, agg]) for k in aggs.keys() for agg in aggs[k]]
         all_agg.columns = ["card_id"] + cols
         return all_agg
 
-    def repurchase_rate(self, df):
+    def do_repurchase_rate(self, df):
 
         def get_rate(series):
             freq_counts = series.value_counts()
