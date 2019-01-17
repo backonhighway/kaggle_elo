@@ -16,6 +16,8 @@ class AggFe:
         if self.prefix == "old":
             recent = self.do_recent_feats(df)
             ret_df = pd.merge(ret_df, recent)
+            repurchase = self.do_recent_feats(df)
+            ret_df = pd.merge(ret_df, repurchase)
         return ret_df
 
     @staticmethod
@@ -83,9 +85,30 @@ class AggFe:
         ret_df.columns = ["card_id"] + ["_".join([self.prefix, agg]) for agg in aggs]
         return ret_df
 
-    def do_recent_feats(self, df):
+    @staticmethod
+    def do_recent_feats(df):
         recent_df = df[df["trans_elapsed_days"] <= 180]
-        return self.do_base_agg(recent_df, "recent")
+        aggs = {
+            "installments": ["mean", "sum"],
+            "merchant_id": ["nunique"],
+            "purchase_amount": ["max", "min", "mean", "std", "count", "skew", "sum"],
+        }
+        all_agg = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
+        cols = ["_".join(["recent", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        all_agg.columns = ["card_id"] + cols
+        return all_agg
+
+    def repurchase_rate(self, df):
+
+        def get_rate(series):
+            freq_counts = series.value_counts()
+            repeated = (freq_counts > 1).sum()
+            chances = freq_counts.count()
+            return repeated / chances
+
+        ret_df = df.groupby("card_id")["merchant_id"].apply(lambda x: get_rate(x)).reset_index()
+        ret_df.columns = ["card_id", self.prefix + "_repurchase"]
+        return ret_df
 
     def do_time_feats(self, df):
         counter = df.groupby("card_id")["purchase_amount"].agg("count").reset_index()
