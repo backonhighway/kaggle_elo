@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import datetime
 from sklearn import model_selection
 
 
@@ -8,51 +7,74 @@ class OofFe:
     def __init__(self, prefix):
         self.prefix = prefix
 
-    def do_fe(self, base, ts):
-        _ts = self._do_prep(base, ts)
-        ret_df = self._do_split_fe(base, _ts)
+    def do_fe(self, train, test, ts):
+        _ts = self._do_prep(train, ts)
+        ret_df = self._do_oof_fe(train, test, _ts)
         return ret_df
 
     @staticmethod
-    def _do_prep(base, ts):
-        for_merge = base[["card_id", "target"]]
+    def _do_prep(train, ts):
+        for_merge = train[["card_id", "target"]]
         ts = pd.merge(ts, for_merge, on="card_id", how="left")
         return ts
 
-    def _do_split_fe(self, base, ts):
+    def _do_oof_fe(self, train, test, ts):
         skf = model_selection.StratifiedKFold(n_splits=4, shuffle=True, random_state=0)
-        outliers = (base["target"] < -30).astype(int).values
+        outliers = (train["target"] < -30).astype(int).values
         encoded_ts_list = []
-        for train_index, test_index in skf.split(base, outliers):
-            train_id = base.iloc[train_index]["card_id"]
-            test_id = base.iloc[test_index]["card_id"]
+        for train_index, oof_index in skf.split(train, outliers):
+            train_id = train.iloc[train_index]["card_id"]
+            oof_id = train.iloc[oof_index]["card_id"]
             train_ts = ts[ts["card_id"].isin(train_id)]
-            test_ts = ts[ts["card_id"].isin(test_id)]
-            encoded = self._do_encode(train_ts, test_ts)
+            oof_ts = ts[ts["card_id"].isin(oof_id)]
+            encoded = self._do_encode(train_ts, oof_ts)
             encoded_ts_list.append(encoded)
-        encoded_ts = pd.concat(encoded_ts_list, axis=0)
-        print(encoded_ts.shape)
-        print(encoded_ts.head())
-        ret_df = self._do_agg(encoded_ts)
+        encoded_train_ts = pd.concat(encoded_ts_list, axis=0)
+        print(encoded_train_ts.shape)
+
+        test_id = test["card_id"]
+        test_ts = ts[ts["card_id"].isin(test_id)]
+        encoded_test_ts = self._do_encode(ts, test_ts)
+
+        ret_train = self._do_agg(encoded_train_ts)
+        ret_test = self._do_agg(encoded_test_ts)
+        print(ret_train.shape)
+        print(ret_test.shape)
+        ret_df = pd.concat([ret_train, ret_test], axis=0)
+        print(ret_df.shape)
         return ret_df
 
     @staticmethod
-    def _do_encode(from_df, to_df):
-        target_df = from_df.groupby("merchant_id")["target"].mean().reset_index()
-        target_df.columns = ["merchant_id", "target_encode"]
-        use_col = ["card_id", "merchant_id"]
-        ret_df = pd.merge(to_df[use_col], target_df, on="merchant_id", how="left")
-        return ret_df[["card_id", "target_encode"]]
+    def _do_encode(from_ts, to_ts):
+        ret_df = None
+        cat_col = ["merchant_id"]
+        # cat_col = ["merchant_id", "city_id", "merchant_category_id", "subsector_id"]
+        for col in cat_col:
+            target_df = from_ts.groupby(col)["target"].mean().reset_index()
+            target_df.columns = [col, col + "_target_encode"]
+            if ret_df is None:
+                for_merge_col = ["card_id"] + cat_col
+                ret_df = pd.merge(to_ts[for_merge_col], target_df, on=col, how="left")
+            else:
+                ret_df = pd.merge(ret_df, target_df, on=col, how="left")
+        return ret_df
 
     def _do_agg(self, encoded_ts):
+        # aggs = {
+        #     "merchant_id_target_encode": ["mean", "max", "min"],
+        #     "city_id_target_encode": ["mean", "max", "min"],
+        #     "merchant_category_id_target_encode": ["mean", "max", "min"],
+        #     "subsector_id_target_encode": ["mean", "max", "min"],
+        # }
         aggs = {
-            "target_encode": ["mean", "max", "min"]
+            "merchant_id_target_encode": ["mean"],
+            # "merchant_category_id_target_encode": ["mean", "min"],
+            # "subsector_id_target_encode": ["mean"],
         }
         all_agg = encoded_ts.groupby("card_id").agg(aggs).reset_index()
         cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
         all_agg.columns = ["card_id"] + cols
         return all_agg
-
 
 
 

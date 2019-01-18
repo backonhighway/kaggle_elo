@@ -19,7 +19,7 @@ new_trans = csv_io.read_file(path_const.NEW_TRANS1)
 old_trans = csv_io.read_file(path_const.OLD_TRANS1)
 new_trans2 = csv_io.read_file(path_const.NEW_TRANS2)
 old_trans2 = csv_io.read_file(path_const.OLD_TRANS2)
-new_trans3 = csv_io.read_file(path_const.NEW_TRANS3)
+# new_trans3 = csv_io.read_file(path_const.NEW_TRANS3)
 old_trans3 = csv_io.read_file(path_const.OLD_TRANS3)
 print(train.shape)
 print(test.shape)
@@ -29,14 +29,14 @@ train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
 train = pd.merge(train, new_trans2, on="card_id", how="left")
 train = pd.merge(train, old_trans2, on="card_id", how="left")
-train = pd.merge(train, new_trans3, on="card_id", how="left")
+# train = pd.merge(train, new_trans3, on="card_id", how="left")
 train = pd.merge(train, old_trans3, on="card_id", how="left")
 
 test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
 test = pd.merge(test, new_trans2, on="card_id", how="left")
 test = pd.merge(test, old_trans2, on="card_id", how="left")
-test = pd.merge(test, new_trans3, on="card_id", how="left")
+# test = pd.merge(test, new_trans3, on="card_id", how="left")
 test = pd.merge(test, old_trans3, on="card_id", how="left")
 print(train.shape)
 print(test.shape)
@@ -47,9 +47,10 @@ drop_col = [
     "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
     "old_null_state", "new_null_state", "new_null_install", #"old_null_install",
     "old_cat3_pur_mean", "new_cat3_pur_mean", "old_cat2_pur_mean", "new_cat2_pur_mean",
-    "old_target_encode_mean", "old_target_encode_min", "old_target_encode_max",
-    "new_target_encode_mean", "new_target_encode_min", "new_target_encode_max",
-
+    "old_merchant_category_id_target_encode_mean",
+    "old_merchant_category_id_target_encode_min",
+    "old_subsector_id_target_encode_min",
+    # "old_merchant_id_target_encode_mean",
 ]
 # from elo.common import pred_cols
 # for c in pred_cols.CAT_COLS:
@@ -75,6 +76,7 @@ bagging_num = 1
 split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
+    logger.print("random_state=" + str(99*bagging_index))
     lgb = pocket_lgb.GoldenLgb()
     total_score = 0
     models = []
