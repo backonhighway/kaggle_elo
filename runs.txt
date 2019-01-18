@@ -22,5 +22,12 @@ LB=3.705, gap=0.041
 month, woy nunique, cat2,3 purchase mean -> not need
 local=3.662
 
-low lr
+low lr... made mistake in target-encode
 local=3.655131039520823
+LB=3.712, gap= 0.056
+
+del target-encode
+local=3.6576637407922448
+LB= 3.699, gap=0.042
+
+

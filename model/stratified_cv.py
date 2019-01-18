@@ -47,6 +47,9 @@ drop_col = [
     "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
     "old_null_state", "new_null_state", "new_null_install", #"old_null_install",
     "old_cat3_pur_mean", "new_cat3_pur_mean", "old_cat2_pur_mean", "new_cat2_pur_mean",
+    "old_target_encode_mean", "old_target_encode_min", "old_target_encode_max",
+    "new_target_encode_mean", "new_target_encode_min", "new_target_encode_max",
+
 ]
 # from elo.common import pred_cols
 # for c in pred_cols.CAT_COLS:
