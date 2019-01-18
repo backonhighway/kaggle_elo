@@ -15,4 +15,12 @@ added days_diff
 local=3.669
 LB=3.708, gap=0.039
 
+lower lr
+local=3.664
+LB=3.705, gap=0.041
 
+month, woy nunique, cat2,3 purchase mean -> not need
+local=3.662
+
+low lr
+local=3.655131039520823

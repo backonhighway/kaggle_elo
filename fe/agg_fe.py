@@ -18,6 +18,8 @@ class AggFe:
         if self.prefix == "old":
             #recent = self.do_recent_feats(df)
             #ret_df = pd.merge(ret_df, recent)
+            cond_df = self.do_conditional(df)
+            ret_df = pd.merge(ret_df, cond_df, on="card_id", how="left")
             repurchase = self.do_repurchase_rate(df)
             ret_df = pd.merge(ret_df, repurchase, on="card_id", how="left")
         return ret_df
@@ -30,14 +32,16 @@ class AggFe:
         df['dow'] = df['purchase_date'].dt.dayofweek
         df["weekend"] = np.where(df["dow"] >= 5, 1, 0)
         df["trans_elapsed_days"] = (datetime.date(2018, 6, 1) - df['purchase_date'].dt.date).dt.days
-        # df['hour'] = df['purchase_date'].dt.hour
-        # df["hour"] = np.where(df["hour"] <= 4, df["hour"]+24, df["hour"])
+        df['hour'] = df['purchase_date'].dt.hour
+        df["hour"] = np.where(df["hour"] <= 4, df["hour"]+24, df["hour"])
+        df['woy'] = df['purchase_date'].dt.weekofyear
+        df['month'] = df['purchase_date'].dt.month
+        df["day"] = df['purchase_date'].dt.day
         return df
 
     @staticmethod
     def do_base_agg(df, prefix):
         aggs = {
-            "authorized_flag": ["mean"],
             "city_id": ["nunique"],  # maybe the most frequent one?
             "category_1": ["mean"],
             "installments": ["mean", "sum"],
@@ -50,10 +54,19 @@ class AggFe:
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
             "trans_elapsed_days": ["mean", "std", "max", "min"],
-            # "weekend": ["mean"]
-            # "dow": ["mean"],
-            # "hour": ["mean"]
         }
+        old_aggs = {
+            "authorized_flag": ["mean"],
+            "month": ["nunique"],
+            "woy": ["nunique"],
+            # "weekend": ["mean"],
+            # "dow": ["nunique"],
+            "hour": ["nunique"],
+            "day": ["nunique"],
+        }
+        if prefix == "old":
+            aggs.update(old_aggs)
+
         all_agg = df.groupby(["card_id"]).agg(aggs).reset_index()
         cols = ["_".join([prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
         all_agg.columns = ["card_id"] + cols
@@ -99,6 +112,24 @@ class AggFe:
         ret_df = df.groupby("card_id")[["category_2", "category_3"]]\
             .apply(lambda s: s.isna().sum()).reset_index()
         ret_df.columns = ["card_id", self.prefix + "_null_install", self.prefix + "_null_state"]
+        return ret_df
+
+    def do_conditional(self, df):
+        aggs = {
+            "purchase_amount": ["max", "min", "mean", "std", "sum"],
+        }
+        not_auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
+        not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        auth = df[df["authorized_flag"] == 1].groupby("card_id").agg(aggs).reset_index()
+        auth.columns = ["card_id"] + ["_".join([self.prefix, "auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        no_city = df[df["city_id"] == -1].groupby("card_id").agg(aggs).reset_index()
+        no_city.columns = ["card_id"] + ["_".join([self.prefix, "no_city", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        no_install = df[df["installments"] == -1].groupby("card_id").agg(aggs).reset_index()
+        no_install.columns = ["card_id"] + ["_".join([self.prefix, "no_install", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+
+        ret_df = pd.merge(not_auth, auth, on="card_id", how="outer")
+        ret_df = pd.merge(ret_df, no_city, on="card_id", how="outer")
+        ret_df = pd.merge(ret_df, no_install, on="card_id", how="outer")
         return ret_df
 
     @staticmethod

@@ -35,6 +35,8 @@ OLD_TRANS1 = os.path.join(INPUT_DIR, "old_trans1.csv")
 NEW_TRANS1 = os.path.join(INPUT_DIR, "new_trans1.csv")
 OLD_TRANS2 = os.path.join(INPUT_DIR, "old_trans2.csv")
 NEW_TRANS2 = os.path.join(INPUT_DIR, "new_trans2.csv")
+OLD_TRANS3 = os.path.join(INPUT_DIR, "old_trans3.csv")
+NEW_TRANS3 = os.path.join(INPUT_DIR, "new_trans3.csv")
 
 OUTPUT_SUB = os.path.join(SUB_DIR, "temp_sub.csv")
 OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")

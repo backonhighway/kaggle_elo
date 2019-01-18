@@ -18,6 +18,23 @@ class GoldenLgb:
             'seed': seed,
             'verbose': 0,
         }
+        self.train_param = {
+            'num_leaves': 31,
+            'min_data_in_leaf': 30,
+            'objective': 'regression',
+            'max_depth': -1,
+            'learning_rate': 0.01,
+            "min_child_samples": 20,
+            "boosting": "gbdt",
+            "feature_fraction": 0.9,
+            "bagging_freq": 1,
+            "bagging_fraction": 0.9,
+            "bagging_seed": 11,
+            "metric": 'rmse',
+            "lambda_l1": 0.1,
+            "verbosity": -1,
+            "random_state": 4590
+        }
         self.target_col_name = "target"
         self.category_col = cat_col
         self.drop_cols = [
@@ -32,7 +49,7 @@ class GoldenLgb:
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=1000,
+                          num_boost_round=2000,
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')

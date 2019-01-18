@@ -1,36 +1,5 @@
-do batch_num agg and concat
-run predictions
+target encoding merchants
+encode merchant days after first appear
+encode category diff purchase amount from mean
 
-predict every pred_col from test->train
-predict every pred_col from train->test
-
-make two models separated with data of extragal, gal
-
-predict by using models from bare time series
-
-use nn
-do pseudo-labeling
-
-use clustering from test, then label train with it
-
-make model to detect whether a row is train or test
--> use it for labeling class99
-
-Do batch agg with different batch len
-show batch length for it
-
-rewrite submodel
-
-in a batch, the 30-70percentile has a max diff of mjd
-how much time does it take to recover to normalcy
-
-need to take the beginning and end
-----------------------
-
-
-
-
-
-
-
-
+purchase amount based on flags
