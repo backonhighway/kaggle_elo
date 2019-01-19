@@ -116,7 +116,7 @@ class AggFe:
 
     def do_conditional(self, df):
         aggs = {
-            "purchase_amount": ["max", "min", "mean", "std", "sum"],
+            "purchase_amount": ["max", "min", "mean"],
         }
         not_auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
         not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
