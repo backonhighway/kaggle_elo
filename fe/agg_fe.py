@@ -16,8 +16,8 @@ class AggFe:
         nan_feats = self.do_nan_feats(df)
         ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
         if self.prefix == "old":
-            #recent = self.do_recent_feats(df)
-            #ret_df = pd.merge(ret_df, recent)
+            # recent = self.do_recent_feats(df)
+            # ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
             cond_df = self.do_conditional(df)
             ret_df = pd.merge(ret_df, cond_df, on="card_id", how="left")
             repurchase = self.do_repurchase_rate(df)
@@ -116,7 +116,7 @@ class AggFe:
 
     def do_conditional(self, df):
         aggs = {
-            "purchase_amount": ["max", "min", "mean"],
+            "purchase_amount": ["max", "min", "mean"]
         }
         not_auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
         not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
@@ -136,9 +136,10 @@ class AggFe:
     def do_recent_feats(df):
         recent_df = df[df["trans_elapsed_days"] <= 180]
         aggs = {
-            "installments": ["sum"],
+            # "installments": ["sum"],
             "merchant_id": ["nunique"],
-            "purchase_amount": ["mean", "count", "sum"],
+            "purchase_amount": ["count"],
+            # "purchase_amount": ["mean", "count", "sum"],
         }
         all_agg = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
         cols = ["_".join(["recent", k, agg]) for k in aggs.keys() for agg in aggs[k]]
