@@ -25,7 +25,7 @@ class MerchantFe:
         merged = pd.merge(trans, mer, on="merchant_id", how="left")
         print(merged.shape)
         aggs = {
-            "mer_rank": ["mean", "max", "min"],
+            # "mer_rank": ["mean", "max", "min"],  quite bad
             "merchant_group_id": ["nunique"],
             "category_4": ["mean"],
         }

@@ -12,3 +12,6 @@ df["target"] = df["col1"] + df["col2"]
 x = df.groupby("key")[["col1", "col2"]].apply(lambda s: s.isna().sum()).reset_index()
 
 print(x)
+
+x = df.groupby("key").agg({"col1": ["mean"]}).reset_index()
+print(x)
