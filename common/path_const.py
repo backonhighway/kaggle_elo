@@ -33,6 +33,8 @@ HT_CAT = os.path.join(NN_DIR, "ht_cat.npy")
 # For LGBM
 OLD_TRANS1 = os.path.join(INPUT_DIR, "old_trans1.csv")
 NEW_TRANS1 = os.path.join(INPUT_DIR, "new_trans1.csv")
+RE_OLD_TRANS1 = os.path.join(INPUT_DIR, "re_old_trans1.csv")
+RE_NEW_TRANS1 = os.path.join(INPUT_DIR, "re_new_trans1.csv")
 OLD_TRANS2 = os.path.join(INPUT_DIR, "old_trans2.csv")
 NEW_TRANS2 = os.path.join(INPUT_DIR, "new_trans2.csv")
 OLD_TRANS3 = os.path.join(INPUT_DIR, "old_trans3.csv")

@@ -16,41 +16,20 @@ csv_io = pocket_file_io.GoldenCsv()
 
 train = csv_io.read_file(path_const.TRAIN1)
 test = csv_io.read_file(path_const.TEST1)
-new_trans = csv_io.read_file(path_const.NEW_TRANS1)
-old_trans = csv_io.read_file(path_const.OLD_TRANS1)
-new_trans2 = csv_io.read_file(path_const.NEW_TRANS2)
-old_trans2 = csv_io.read_file(path_const.OLD_TRANS2)
-# new_trans3 = csv_io.read_file(path_const.NEW_TRANS3)
+new_trans = csv_io.read_file(path_const.RE_NEW_TRANS1)
+old_trans = csv_io.read_file(path_const.RE_OLD_TRANS1)
 old_trans3 = csv_io.read_file(path_const.OLD_TRANS3)
-# new_trans4 = csv_io.read_file(path_const.NEW_TRANS4)
-# old_trans4 = csv_io.read_file(path_const.OLD_TRANS4)
-# new_trans5 = csv_io.read_file(path_const.NEW_TRANS5)
-# old_trans5 = csv_io.read_file(path_const.OLD_TRANS5)
 print(train.shape)
 print(test.shape)
 timer.time("load csv in ")
 
 train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
-# train = pd.merge(train, new_trans2, on="card_id", how="left")
-# train = pd.merge(train, old_trans2, on="card_id", how="left")
-# # train = pd.merge(train, new_trans3, on="card_id", how="left")
 train = pd.merge(train, old_trans3, on="card_id", how="left")
-# train = pd.merge(train, new_trans4, on="card_id", how="left")
-# train = pd.merge(train, old_trans4, on="card_id", how="left")
-# train = pd.merge(train, new_trans5, on="card_id", how="left")
-# train = pd.merge(train, old_trans5, on="card_id", how="left")
 #
 test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
-# test = pd.merge(test, new_trans2, on="card_id", how="left")
-# test = pd.merge(test, old_trans2, on="card_id", how="left")
-# # test = pd.merge(test, new_trans3, on="card_id", how="left")
 test = pd.merge(test, old_trans3, on="card_id", how="left")
-# test = pd.merge(test, new_trans4, on="card_id", how="left")
-# test = pd.merge(test, old_trans4, on="card_id", how="left")
-# test = pd.merge(test, new_trans5, on="card_id", how="left")
-# test = pd.merge(test, old_trans5, on="card_id", how="left")
 # print(train.shape)
 # print(test.shape)
 #
@@ -67,19 +46,12 @@ drop_col = [
     "old_merchant_category_id_target_encode_mean",
     "old_merchant_category_id_target_encode_min",
     "old_subsector_id_target_encode_min",
-    # "old_merchant_id_target_encode_mean",
     "new_category_4_mean",  # "new_merchant_group_id_nunique", "old_merchant_group_id_nunique"
-    "new_mer_rank_max", "new_mer_rank_min", "new_mer_rank_mean",
-    "old_mer_rank_max", "old_mer_rank_min", "old_mer_rank_mean",
     "new_zero_time_sum", "old_zero_time_sum", "new_zero_time_mean", "old_zero_time_mean",
     "new_mon_nunique_mean", "new_woy_nunique_mean", "new_rush_buy_flag_sum", "new_periodic_flag_sum",
     "old_periodic_flag_sum", "new_rush_buy_flag_mean", "old_rush_buy_flag_mean",
     # "new_month_lag_ptp", "new_month_lag_min",
 ]
-# from elo.common import pred_cols
-# for c in pred_cols.CAT_COLS:
-#     train[c] = np.where(train[c] < 0, 0, train[c]+1)
-#     test[c] = np.where(test[c] < 0, 0, test[c]+1)
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)
 
