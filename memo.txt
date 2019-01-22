@@ -1,5 +1,19 @@
 target encoding merchants
 encode merchant days after first appear
 encode category diff purchase amount from mean
-
 purchase amount based on flags
+---------------------
+
+(install * purchase amount) and mean. maybe log install
+
+last state id same as first?
+
+clean not auth when sequential-non-auth
+
+only use new merchants in old
+
+graph match cards?
+
+newly opened merchants?
+
+cat2 mean... most freq?
