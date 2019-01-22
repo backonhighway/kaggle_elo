@@ -14,6 +14,8 @@ class ReAggFe:
         # ret_df = pd.merge(ret_df, mode_feats, on="card_id", how="left")
         # nan_feats = self.do_nan_feats(df)
         # ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
+        time_feats = self.do_time_feats(df)
+        ret_df = pd.merge(ret_df, time_feats, on="card_id", how="left")
         if self.prefix == "old":
             recent = self.do_recent_feats(df)
             ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
@@ -32,7 +34,7 @@ class ReAggFe:
         df["weekend"] = np.where(df["dow"] >= 5, 1, 0)
         df["trans_elapsed_days"] = (datetime.date(2018, 6, 1) - df['purchase_date'].dt.date).dt.days
         df['hour'] = df['purchase_date'].dt.hour
-        df["hour"] = np.where(df["hour"] <= 4, df["hour"]+24, df["hour"])
+        df["hour"] = np.where(df["hour"] <= 5, df["hour"]+24, df["hour"])
         df['woy'] = df['purchase_date'].dt.weekofyear
         df['month'] = df['purchase_date'].dt.month
         df["day"] = df['purchase_date'].dt.day
@@ -166,12 +168,12 @@ class ReAggFe:
         dow.columns = ["card_id"] + dow_cols
 
         df['hour'] = df['purchase_date'].dt.hour
-        bins = [-1, 5, 10, 14, 18, 23, 25]
-        labels = [1, 2, 3, 4, 5, 6]
-        df['binned_hour'] = pd.cut(df['hour'], bins=bins, labels=labels)
-        df["binned_hour"] = np.where(df["binned_hour"] == 6, 1, df["binned_hour"])
+        df["hour"] = np.where(df["hour"] <= 5, df["hour"]+24, df["hour"])
+        bins = [-1, 12, 17, 21, 32]
+        labels = [1, 2, 3, 4]
+        df['binned_hour'] = (pd.cut(df['hour'], bins=bins, labels=labels)).astype(int)
         hour = pd.crosstab(df["card_id"], df["binned_hour"]).reset_index()
-        hour_cols = ["_".join([self.prefix, "hour", str(i), "count"]) for i in range(5)]
+        hour_cols = ["_".join([self.prefix, "hour", str(i), "count"]) for i in range(4)]
         hour.columns = ["card_id"] + hour_cols
 
         dow = pd.merge(counter, dow, on="card_id", how="inner")
@@ -179,13 +181,12 @@ class ReAggFe:
             dow[c] = dow[c] / dow["cnt"]
         dow.drop(columns="cnt", inplace=True)
 
-        # hour = pd.merge(counter, hour, on="card_id", how="inner")
-        # for c in hour_cols:
-        #     hour[c] = hour[c] / hour["cnt"]
-        # hour.drop(columns="cnt", inplace=True)
+        hour = pd.merge(counter, hour, on="card_id", how="inner")
+        for c in hour_cols:
+            hour[c] = hour[c] / hour["cnt"]
+        hour.drop(columns="cnt", inplace=True)
 
         return hour
-
         # ret_df = pd.merge(dow, hour, on="card_id", how="inner")
         # return ret_df
 
