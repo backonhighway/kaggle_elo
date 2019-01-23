@@ -30,3 +30,5 @@ csv_io.output_csv(old_trans, path_const.OLD_TRANS6)
 csv_io.output_csv(new_trans, path_const.NEW_TRANS6)
 timer.time("done output")
 
+
+print(old_trans[old_trans["card_id"] == "C_ID_0382b662f4"])

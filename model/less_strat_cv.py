@@ -53,10 +53,13 @@ drop_col = [
     "old_merchant_category_id_target_encode_min",
     "old_subsector_id_target_encode_min",
     "new_category_4_mean",  # "new_merchant_group_id_nunique", "old_merchant_group_id_nunique"
-    "new_zero_time_sum", "old_zero_time_sum", "new_zero_time_mean", "old_zero_time_mean",
-    "new_mon_nunique_mean", "new_woy_nunique_mean", "new_rush_buy_flag_sum", "new_periodic_flag_sum",
-    "old_periodic_flag_sum", "new_rush_buy_flag_mean", "old_rush_buy_flag_mean",
+    "new_mon_nunique_mean", "new_woy_nunique_mean",
     # "new_month_lag_ptp", "new_month_lag_min",
+    "new_purchase_amount_skew",  # "new_purchase_amount_std",
+    "old_purchase_amount_skew",  # "old_purchase_amount_std",
+    "new_inst_pur_sum", "new_inst_pur2_sum", "old_inst_pur_sum", "old_inst_pur2_sum",
+    "new_inst_pur_mean", "new_inst_pur2_mean", "old_inst_pur_mean", "old_inst_pur2_mean",
+    # "new_category_2_nunique", "old_category_2_nunique"
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

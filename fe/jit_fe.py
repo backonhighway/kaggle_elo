@@ -15,4 +15,7 @@ class JitFe:
         df["div_old_count_by_month"] = df["old_purchase_amount_count"] / df["old_month_lag_ptp"]
         df["proper_new_purchase_amount_sum"] = df["new_purchase_amount_sum"] + df["new_purchase_amount_count"]
         df["proper_old_purchase_amount_sum"] = df["old_purchase_amount_sum"] + df["old_purchase_amount_count"]
+
+        # df["proper_auth_mean"] = df["old_authorized_flag_mean"] - df["old_seq_non_auth_mean"]
+        # df["proper_auth_sum"] = df["old_authorized_flag_sum"] - df["old_seq_non_auth_sum"]
         return df

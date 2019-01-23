@@ -39,6 +39,9 @@ class ReAggFe:
         df['month'] = df['purchase_date'].dt.month
         df["day"] = df['purchase_date'].dt.day
         df["installments"] = np.where(df["installments"] == 999, -1, df["installments"])
+        # df["inst_pur"] = df["installments"] + 1.0
+        # df["inst_pur"] = (df["purchase_amount"]+1) * np.log1p(df["inst_pur"])
+        # df["inst_pur2"] = (df["purchase_amount"]+1) * df["category_3"]
         return df
 
     @staticmethod
@@ -50,15 +53,17 @@ class ReAggFe:
             "category_3": ["mean"],
             "merchant_id": ["nunique"],
             "merchant_category_id": ["nunique"],  # maybe target encode or purchase encode?
-            "month_lag": ["mean", "std", "max", "min"],
+            "month_lag": ["mean", "std", "max", "min", "skew"],
             "purchase_amount": ["max", "min", "mean", "std", "count", "skew", "sum"],
-            # "category_2": ["nunique", "top"],
+            "category_2": ["nunique"],
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
-            "trans_elapsed_days": ["mean", "std", "max", "min"],
+            "trans_elapsed_days": ["mean", "std", "max", "min", "skew"],
+            # "inst_pur": ["mean"],
+            # "inst_pur2": ["mean"],
         }
         old_aggs = {
-            "authorized_flag": ["mean"],
+            "authorized_flag": ["mean", "sum"],
             "month": ["nunique"],
             "woy": ["nunique"],
             "hour": ["nunique"],
@@ -189,6 +194,7 @@ class ReAggFe:
         return hour
         # ret_df = pd.merge(dow, hour, on="card_id", how="inner")
         # return ret_df
+
 
 
 
