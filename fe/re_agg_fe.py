@@ -70,6 +70,7 @@ class ReAggFe:
             "woy": ["nunique"],
             "hour": ["nunique"],
             "day": ["nunique"],
+            "dow": ["nunique"]
         }
         if prefix == "old":
             aggs.update(old_aggs)
@@ -143,11 +144,12 @@ class ReAggFe:
 
     @staticmethod
     def do_recent_feats(df):
-        recent_df = df[df["trans_elapsed_days"] <= 180]
+        # recent_df = df[df["trans_elapsed_days"] <= 180]
+        recent_df = df[df["month_lag"] >= -2]
         aggs = {
             "installments": ["sum"],
             # "merchant_id": ["nunique"],
-            # "purchase_amount": ["count"],
+            "purchase_amount": ["count"],
             # "purchase_amount": ["mean", "count", "sum"],
         }
         all_agg = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
