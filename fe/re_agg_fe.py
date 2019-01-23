@@ -12,8 +12,8 @@ class ReAggFe:
         ret_df = self.do_base_agg(df, self.prefix)
         # mode_feats = self.do_mode_feats(df)
         # ret_df = pd.merge(ret_df, mode_feats, on="card_id", how="left")
-        # nan_feats = self.do_nan_feats(df)
-        # ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
+        nan_feats = self._do_nan_feats(df)
+        ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
         time_feats = self.do_time_feats(df)
         ret_df = pd.merge(ret_df, time_feats, on="card_id", how="left")
         if self.prefix == "old":
@@ -42,6 +42,7 @@ class ReAggFe:
         # df["inst_pur"] = df["installments"] + 1.0
         # df["inst_pur"] = (df["purchase_amount"]+1) * np.log1p(df["inst_pur"])
         # df["inst_pur2"] = (df["purchase_amount"]+1) * df["category_3"]
+        df["no_city"] = np.where(df["city_id"] == -1, 1, 0)
         return df
 
     @staticmethod
@@ -59,6 +60,7 @@ class ReAggFe:
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
             "trans_elapsed_days": ["mean", "std", "max", "min", "skew"],
+            "no_city": ["mean"]
             # "inst_pur": ["mean"],
             # "inst_pur2": ["mean"],
         }
@@ -113,10 +115,12 @@ class ReAggFe:
         ret_df.columns = ["card_id"] + ["_".join([self.prefix, agg]) for agg in aggs]
         return ret_df
 
-    def do_nan_feats(self, df):
-        ret_df = df.groupby("card_id")[["category_2", "category_3"]]\
+    def _do_nan_feats(self, df):
+        ret_df = df.groupby("card_id")[["merchant_id", "category_2", "category_3"]]\
             .apply(lambda s: s.isna().sum()).reset_index()
-        ret_df.columns = ["card_id", self.prefix + "_null_install", self.prefix + "_null_state"]
+        cols = ["null_merchant", "null_state", "null_install"]
+        cols = ["_".join([self.prefix, c]) for c in cols]
+        ret_df.columns = ["card_id"] + cols
         return ret_df
 
     def do_conditional(self, df):

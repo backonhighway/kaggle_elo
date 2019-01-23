@@ -12,6 +12,10 @@ class SortedFe:
 
         ret_df = self._do_day(df)
 
+        # probably noise, but not bad
+        # time_df = self._do_time_diff(df)
+        # ret_df = pd.merge(ret_df, time_df, on="card_id", how="left")
+
         # auth_df = self._do_auth(df)
         # ret_df = pd.merge(ret_df, auth_df, on="card_id", how="left")
         # state_df = self._do_state(df)
@@ -38,6 +42,18 @@ class SortedFe:
         # ret_df = pd.merge(first_df, last_df, on="card_id", how="left")
         # return ret_df
         return last_df
+
+    def _do_time_diff(self, df):
+        df["prev_time"] = df.groupby("card_id")["purchase_date"].transform(lambda x: x.shift())
+        df["time_diff"] = (df["purchase_date"] - df["prev_time"]).dt.total_seconds()
+
+        aggs = {
+            "time_diff": ["max", "mean", "min", "std", "skew"]
+        }
+        ret_df = df.groupby("card_id").agg(aggs).reset_index()
+        cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        ret_df.columns = ["card_id"] + cols
+        return ret_df
 
     def _do_state(self, df):
         use_df = df[df["state_id"] > 0]
