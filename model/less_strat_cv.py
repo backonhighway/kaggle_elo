@@ -59,7 +59,9 @@ drop_col = [
     "old_purchase_amount_skew",  # "old_purchase_amount_std",
     "new_inst_pur_sum", "new_inst_pur2_sum", "old_inst_pur_sum", "old_inst_pur2_sum",
     "new_inst_pur_mean", "new_inst_pur2_mean", "old_inst_pur_mean", "old_inst_pur2_mean",
-    # "new_category_2_nunique", "old_category_2_nunique"
+    # "new_category_2_nunique", "old_category_2_nunique",
+    # "old_null_merchant", "new_null_merchant"
+
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

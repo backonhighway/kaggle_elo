@@ -17,17 +17,20 @@ class ReAggFe:
         time_feats = self.do_time_feats(df)
         ret_df = pd.merge(ret_df, time_feats, on="card_id", how="left")
         if self.prefix == "old":
-            recent = self.do_recent_feats(df)
+            recent = self._do_recent_feats(df)  # with/without rec1 makes difference between folds
             ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
             cond_df = self.do_conditional(df)
             ret_df = pd.merge(ret_df, cond_df, on="card_id", how="left")
             repurchase = self.do_repurchase_rate(df)
             ret_df = pd.merge(ret_df, repurchase, on="card_id", how="left")
+        # if self.prefix == "new":
+        #     recent = self._do_rec_feat(df, 2, "rec_new")
+        #     ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
         return ret_df
 
     @staticmethod
     def do_prep(df):
-        df['authorized_flag'] = df['authorized_flag'].map({'Y': 1, 'N': 0})
+        df['authorized_flag'] = df['authorized_flag'].map({'Y': 0, 'N': 1})
         df['category_1'] = df['category_1'].map({'Y': 1, 'N': 0})
         df['category_3'] = df['category_3'].map({'A': 0, 'B': 1, 'C': 2})
         df['dow'] = df['purchase_date'].dt.dayofweek
@@ -128,9 +131,9 @@ class ReAggFe:
         aggs = {
             "purchase_amount": ["max", "min", "mean"]
         }
-        not_auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
+        not_auth = df[df["authorized_flag"] == 1].groupby("card_id").agg(aggs).reset_index()
         not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
-        auth = df[df["authorized_flag"] == 1].groupby("card_id").agg(aggs).reset_index()
+        auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
         auth.columns = ["card_id"] + ["_".join([self.prefix, "auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
         no_city = df[df["city_id"] == -1].groupby("card_id").agg(aggs).reset_index()
         no_city.columns = ["card_id"] + ["_".join([self.prefix, "no_city", k, agg]) for k in aggs.keys() for agg in aggs[k]]
@@ -142,20 +145,24 @@ class ReAggFe:
         ret_df = pd.merge(ret_df, no_install, on="card_id", how="outer")
         return ret_df
 
+    def _do_recent_feats(self, df):
+        rec3_df = self._do_rec_feat(df, -2, "rec3")
+        rec1_df = self._do_rec_feat(df, 0, "rec1")
+
+        ret_df = pd.merge(rec1_df, rec3_df, on="card_id", how="left")
+        return ret_df
+
     @staticmethod
-    def do_recent_feats(df):
-        # recent_df = df[df["trans_elapsed_days"] <= 180]
-        recent_df = df[df["month_lag"] >= -2]
+    def _do_rec_feat(df, lag, name):
+        recent_df = df[df["month_lag"] >= lag]
         aggs = {
-            "installments": ["sum"],
-            # "merchant_id": ["nunique"],
-            "purchase_amount": ["count"],
-            # "purchase_amount": ["mean", "count", "sum"],
+            "installments": ["sum", ],
+            "purchase_amount": ["count"],  # max is not bad
         }
-        all_agg = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
-        cols = ["_".join(["recent", k, agg]) for k in aggs.keys() for agg in aggs[k]]
-        all_agg.columns = ["card_id"] + cols
-        return all_agg
+        rec_df = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
+        cols = ["_".join([name, k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        rec_df.columns = ["card_id"] + cols
+        return rec_df
 
     def do_repurchase_rate(self, df):
 
