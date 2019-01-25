@@ -53,7 +53,7 @@ class OofFe:
     @staticmethod
     def _do_encode(from_ts, to_ts):
         ret_df = None
-        cat_col = ["merchant_id", "hour", "ym"]  # hour, ym good for diversity probably
+        cat_col = ["merchant_id", "subsector_id"]  # hour, ym good for diversity probably
         # cat_col = ["merchant_id", "city_id", "merchant_category_id", "subsector_id"]
         for col in cat_col:
             target_df = from_ts.groupby(col)["target"].mean().reset_index()
@@ -74,10 +74,10 @@ class OofFe:
         # }
         aggs = {
             "merchant_id_target_encode": ["mean"],
-            "hour_target_encode": ["mean"],
-            "ym_target_encode": ["mean"],
+            # "hour_target_encode": ["mean"],
+            # "ym_target_encode": ["mean"],
             # "merchant_category_id_target_encode": ["mean", "min"],
-            # "subsector_id_target_encode": ["mean"],
+            "subsector_id_target_encode": ["mean"],
         }
         all_agg = encoded_ts.groupby("card_id").agg(aggs).reset_index()
         cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
