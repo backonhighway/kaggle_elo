@@ -25,4 +25,6 @@ class JitFe:
         df["div_rec3_inst"] = df["rec3_installments_sum"] / df["old_installments_sum"]
         df["div_rec13_cnt"] = df["rec1_purchase_amount_count"] / df["rec3_purchase_amount_count"]
         df["div_rec13_inst"] = df["rec1_installments_sum"] / df["rec3_installments_sum"]
+
+        # df["new_last_day"] = df["new_last_day"].fillna(df["old_last_day"])
         return df

@@ -16,6 +16,12 @@ class OofFe:
     def _do_prep(train, ts):
         for_merge = train[["card_id", "target"]]
         ts = pd.merge(ts, for_merge, on="card_id", how="left")
+        ts['hour'] = ts['purchase_date'].dt.hour
+        ts['minute'] = ts['purchase_date'].dt.minute
+        ts['second'] = ts['purchase_date'].dt.second
+        mask = (ts["hour"] == 0) & (ts["minute"] == 0) & (ts["second"] == 0)
+        ts["hour"] = np.where(mask, 24, ts["hour"])
+        ts["ym"] = ts['purchase_date'].dt.year * 100 + ts['purchase_date'].dt.month
         return ts
 
     def _do_oof_fe(self, train, test, ts):
@@ -47,7 +53,7 @@ class OofFe:
     @staticmethod
     def _do_encode(from_ts, to_ts):
         ret_df = None
-        cat_col = ["merchant_id"]
+        cat_col = ["merchant_id", "hour", "ym"]  # hour, ym good for diversity probably
         # cat_col = ["merchant_id", "city_id", "merchant_category_id", "subsector_id"]
         for col in cat_col:
             target_df = from_ts.groupby(col)["target"].mean().reset_index()
@@ -68,6 +74,8 @@ class OofFe:
         # }
         aggs = {
             "merchant_id_target_encode": ["mean"],
+            "hour_target_encode": ["mean"],
+            "ym_target_encode": ["mean"],
             # "merchant_category_id_target_encode": ["mean", "min"],
             # "subsector_id_target_encode": ["mean"],
         }
