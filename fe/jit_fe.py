@@ -19,6 +19,7 @@ class JitFe:
         # df["proper_auth_mean"] = df["old_authorized_flag_mean"] - df["old_seq_non_auth_mean"]
         # df["proper_auth_sum"] = df["old_authorized_flag_sum"] - df["old_seq_non_auth_sum"]
 
+        # seems good without target-encodes
         df["div_rec1_cnt"] = df["rec1_purchase_amount_count"] / df["old_purchase_amount_count"]
         df["div_rec1_inst"] = df["rec1_installments_sum"] / df["old_installments_sum"]
         df["div_rec3_cnt"] = df["rec3_purchase_amount_count"] / df["old_purchase_amount_count"]
@@ -27,4 +28,5 @@ class JitFe:
         df["div_rec13_inst"] = df["rec1_installments_sum"] / df["rec3_installments_sum"]
 
         # df["new_last_day"] = df["new_last_day"].fillna(df["old_last_day"])
+        df['old_CLV'] = df['old_purchase_amount_count'] * df['old_pa2_sum'] / df['old_month_diff_mean']
         return df

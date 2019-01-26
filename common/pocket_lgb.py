@@ -7,17 +7,17 @@ from elo.common import pred_cols
 
 class GoldenLgb:
     def __init__(self, seed=99, cat_col=pred_cols.CAT_COLS):
-        self.train_param = {
-            'learning_rate': 0.05,
-            'num_leaves': 31,
-            'boosting': 'gbdt',
-            'application': 'regression',
-            'metric': 'rmse',
-            'feature_fraction': .7,
-            #"max_bin": 511,
-            'seed': seed,
-            'verbose': 0,
-        }
+        # self.train_param = {
+        #     'learning_rate': 0.02,
+        #     'num_leaves': 31,
+        #     'boosting': 'gbdt',
+        #     'application': 'regression',
+        #     'metric': 'rmse',
+        #     'feature_fraction': .7,
+        #     #"max_bin": 511,
+        #     'seed': seed,
+        #     'verbose': 0,
+        # }
         self.train_param = {
             'num_leaves': 31,
             'min_data_in_leaf': 30,

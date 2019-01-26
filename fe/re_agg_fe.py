@@ -17,10 +17,10 @@ class ReAggFe:
         time_feats = self.do_time_feats(df)
         ret_df = pd.merge(ret_df, time_feats, on="card_id", how="left")
         if self.prefix == "old":
-            recent = self._do_recent_feats(df)  # with/without rec1 makes difference between folds
-            ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
             cond_df = self.do_conditional(df)
             ret_df = pd.merge(ret_df, cond_df, on="card_id", how="left")
+            recent = self._do_recent_feats(df)  # with/without rec1 makes difference between folds
+            ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
             repurchase = self.do_repurchase_rate(df)
             ret_df = pd.merge(ret_df, repurchase, on="card_id", how="left")
         # if self.prefix == "new":
@@ -46,6 +46,14 @@ class ReAggFe:
         # df["inst_pur"] = (df["purchase_amount"]+1) * np.log1p(df["inst_pur"])
         # df["inst_pur2"] = (df["purchase_amount"]+1) * df["category_3"]
         df["no_city"] = np.where(df["city_id"] == -1, 1, 0)
+        df["pa2"] = np.where(df["purchase_amount"] <= 0.8, 0.8, df["purchase_amount"])
+        df['month_diff'] = (datetime.datetime.today() - df['purchase_date']).dt.days // 30
+        df['month_diff'] += df['month_lag']
+        df["pa2_month_diff"] = df["pa2"] * df["month_diff"]
+
+        # low_days = ["2017-04-08", "2017-05-12", "2017-05-24", "2017-06-19", "2017-06-30"]
+        # df["str_date"] = df["purchase_date"].dt.date.astype(str)
+        # df["low_day_flag"] = np.where(df["str_date"].isin(low_days), 1, 0)
         return df
 
     @staticmethod
@@ -57,23 +65,27 @@ class ReAggFe:
             "category_3": ["mean"],
             "merchant_id": ["nunique"],
             "merchant_category_id": ["nunique"],  # maybe target encode or purchase encode?
-            "month_lag": ["mean", "std", "max", "min", "skew"],
-            "purchase_amount": ["max", "min", "mean", "std", "count", "skew", "sum"],
+            "month_lag": ["mean", "std", "max", "min", "skew", "nunique"],
+            "purchase_amount": ["max", "min", "mean", "std", "count", "sum"],  # "skew"],
             "category_2": ["nunique"],
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
-            "trans_elapsed_days": ["mean", "std", "max", "min", "skew"],
-            "no_city": ["mean"]
+            "trans_elapsed_days": ["mean", "std", "max", "min", "skew", "nunique"],
+            "no_city": ["mean", "count"],
             # "inst_pur": ["mean"],
             # "inst_pur2": ["mean"],
+            "pa2": ["max", "min", "mean", "std", "sum"],
         }
         old_aggs = {
-            "authorized_flag": ["mean", "sum"],
+            "authorized_flag": ["mean", "sum", "min", "max"],
             "month": ["nunique"],
             "woy": ["nunique"],
             "hour": ["nunique"],
             "day": ["nunique"],
-            "dow": ["nunique"]
+            "dow": ["nunique"],
+            # "low_day_flag": ["sum", "mean"]
+            "month_diff": ["mean", "std"],
+            "pa2_month_diff": ["mean", "min"]
         }
         if prefix == "old":
             aggs.update(old_aggs)
@@ -131,18 +143,24 @@ class ReAggFe:
         aggs = {
             "purchase_amount": ["max", "min", "mean"]
         }
-        not_auth = df[df["authorized_flag"] == 1].groupby("card_id").agg(aggs).reset_index()
-        not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
-        auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
-        auth.columns = ["card_id"] + ["_".join([self.prefix, "auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
-        no_city = df[df["city_id"] == -1].groupby("card_id").agg(aggs).reset_index()
-        no_city.columns = ["card_id"] + ["_".join([self.prefix, "no_city", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        no_city_agg = {
+            "purchase_amount": ["max", "min", "mean"],
+            "installments": ["mean", "sum"],
+        }
+        no_city = df[df["city_id"] == -1].groupby("card_id").agg(no_city_agg).reset_index()
+        no_city.columns = ["card_id"] + ["_".join([self.prefix, "no_city", k, agg]) for k in no_city_agg.keys() for agg in no_city_agg[k]]
         no_install = df[df["installments"] == -1].groupby("card_id").agg(aggs).reset_index()
         no_install.columns = ["card_id"] + ["_".join([self.prefix, "no_install", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        ret_df = pd.merge(no_city, no_install, on="card_id", how="outer")
 
-        ret_df = pd.merge(not_auth, auth, on="card_id", how="outer")
-        ret_df = pd.merge(ret_df, no_city, on="card_id", how="outer")
-        ret_df = pd.merge(ret_df, no_install, on="card_id", how="outer")
+        if self.prefix == "old":
+            not_auth = df[df["authorized_flag"] == 1].groupby("card_id").agg(aggs).reset_index()
+            not_auth.columns = ["card_id"] + ["_".join([self.prefix, "not_auth", k, agg]) for k in aggs.keys() for agg in
+                                              aggs[k]]
+            auth = df[df["authorized_flag"] == 0].groupby("card_id").agg(aggs).reset_index()
+            auth.columns = ["card_id"] + ["_".join([self.prefix, "auth", k, agg]) for k in aggs.keys() for agg in aggs[k]]
+            ret_df = pd.merge(ret_df, not_auth, on="card_id", how="outer")
+            ret_df = pd.merge(ret_df, auth, on="card_id", how="outer")
         return ret_df
 
     def _do_recent_feats(self, df):
