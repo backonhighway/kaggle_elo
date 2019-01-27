@@ -21,21 +21,25 @@ old_trans = csv_io.read_file(path_const.RE_OLD_TRANS1)
 old_trans3 = csv_io.read_file(path_const.OLD_TRANS3)
 new_trans6 = csv_io.read_file(path_const.NEW_TRANS6)
 old_trans6 = csv_io.read_file(path_const.OLD_TRANS6)
+old_trans9 = csv_io.read_file(path_const.OLD_TRANS9)
 print(train.shape)
 print(test.shape)
-
 timer.time("load csv in ")
+
+
 train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans3, on="card_id", how="left")
 train = pd.merge(train, new_trans6, on="card_id", how="left")
 train = pd.merge(train, old_trans6, on="card_id", how="left")
+train = pd.merge(train, old_trans9, on="card_id", how="left")
 #
 test = pd.merge(test, new_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans, on="card_id", how="left")
 test = pd.merge(test, old_trans3, on="card_id", how="left")
 test = pd.merge(test, new_trans6, on="card_id", how="left")
 test = pd.merge(test, old_trans6, on="card_id", how="left")
+test = pd.merge(test, old_trans9, on="card_id", how="left")
 # print(train.shape)
 # print(test.shape)
 #
@@ -59,7 +63,7 @@ drop_col = [
     "old_ym_target_encode_mean", "new_ym_target_encode_mean",
     "old_hour_target_encode_mean", "new_hour_target_encode_mean",
     "old_subsector_id_target_encode_mean",
-    "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean"
+    "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

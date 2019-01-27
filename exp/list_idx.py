@@ -9,6 +9,6 @@ df = pd.DataFrame({
 df["col2"] = df["col1"] * 3 - 1
 df["target"] = df["col1"] + df["col2"]
 
+print(df[1:])
 
-x = df.groupby("key").last().reset_index()
-print(x)
+

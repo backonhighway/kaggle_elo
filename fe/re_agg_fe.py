@@ -23,6 +23,8 @@ class ReAggFe:
             ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
             repurchase = self.do_repurchase_rate(df)
             ret_df = pd.merge(ret_df, repurchase, on="card_id", how="left")
+            mer_df = self._do_mer_cnt(df)
+            ret_df = pd.merge(ret_df, mer_df, on="card_id", how="left")
         # if self.prefix == "new":
         #     recent = self._do_rec_feat(df, 2, "rec_new")
         #     ret_df = pd.merge(ret_df, recent, on="card_id", how="left")
@@ -71,7 +73,7 @@ class ReAggFe:
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
             "trans_elapsed_days": ["mean", "std", "max", "min", "skew", "nunique"],
-            "no_city": ["mean", "count"],
+            "no_city": ["mean", "count"],  # sum should be count???
             # "inst_pur": ["mean"],
             # "inst_pur2": ["mean"],
             "pa2": ["mean", "sum"],  # min, std, max
@@ -226,8 +228,16 @@ class ReAggFe:
         # ret_df = pd.merge(dow, hour, on="card_id", how="inner")
         # return ret_df
 
-
-
+    def _do_mer_cnt(self, df):
+        g = df.groupby(["card_id", "merchant_id"])["purchase_amount"].count().reset_index()
+        g.columns = ["card_id", "merchant_id", "mer_cnt"]
+        aggs = {
+            "mer_cnt": ["mean", "max"]
+        }
+        ret_df = g.groupby("card_id").agg(aggs).reset_index()
+        cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        ret_df.columns = ["card_id"] + cols
+        return ret_df
 
 
 

@@ -68,6 +68,7 @@ use_col += [
     # "new_purchase_amount_sum", "old_purchase_amount_sum",  # 0.0005?
     # "old_time_diff_std" worse
 ]
+
 train_x = train[use_col]
 test_x = test[use_col]
 

@@ -19,7 +19,7 @@ class GoldenLgb:
         #     'verbose': 0,
         # }
         self.train_param = {
-            'num_leaves': 3,
+            'num_leaves': 31,
             'min_data_in_leaf': 30,
             'objective': 'regression',
             'max_depth': -1,
