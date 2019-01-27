@@ -23,8 +23,8 @@ new_trans6 = csv_io.read_file(path_const.NEW_TRANS6)
 old_trans6 = csv_io.read_file(path_const.OLD_TRANS6)
 print(train.shape)
 print(test.shape)
-timer.time("load csv in ")
 
+timer.time("load csv in ")
 train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans3, on="card_id", how="left")
@@ -74,7 +74,6 @@ timer.time("prepare train in ")
 print(train_x.shape)
 print(train_y.shape)
 print(test_x.shape)
-print(train["old_month_diff_mean"].describe())
 
 
 submission = pd.DataFrame()

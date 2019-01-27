@@ -40,7 +40,7 @@ fer = jit_fe.JitFe()
 train = fer.do_fe(train)
 test = fer.do_fe(test)
 
-train_y = train["target"]
+train_y = (train["target"] < -30).astype(int)
 # 3.660 - 3.658
 use_col = [
     "new_trans_elapsed_days_max", "new_trans_elapsed_days_min", "new_trans_elapsed_days_mean",  # 0.001
@@ -53,6 +53,7 @@ use_col = [
     "new_purchase_amount_max", "new_purchase_amount_count", "new_purchase_amount_mean",  # 0.020
     "old_purchase_amount_max", "old_purchase_amount_count", "old_purchase_amount_mean",  # 0.002
     "old_category_1_mean", "new_category_1_mean",  # 0.006
+    "old_authorized_flag_sum",  # "old_authorized_flag_mean", bad?
     "old_authorized_flag_sum",  # "old_authorized_flag_mean", bad?
     "old_no_city_purchase_amount_min",  # 0.003
     "old_no_city_purchase_amount_max", "old_no_city_purchase_amount_mean",  # 0.002
@@ -90,7 +91,7 @@ split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
     logger.print("random_state=" + str(99*bagging_index))
-    lgb = pocket_lgb.GoldenLgb()
+    lgb = pocket_lgb.AdversarialLgb()
     total_score = 0
     models = []
     train_preds = []
@@ -99,7 +100,7 @@ for bagging_index in range(bagging_num):
         y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
-        score = model.best_score["valid_0"]["rmse"]
+        score = model.best_score["valid_0"]["binary_logloss"]
         total_score += score
         y_pred = model.predict(test_x)
         valid_set_pred = model.predict(X_test)

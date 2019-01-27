@@ -40,7 +40,6 @@ fer = jit_fe.JitFe()
 train = fer.do_fe(train)
 test = fer.do_fe(test)
 
-train_y = train["target"]
 # 3.660 - 3.658
 use_col = [
     "new_trans_elapsed_days_max", "new_trans_elapsed_days_min", "new_trans_elapsed_days_mean",  # 0.001
@@ -59,7 +58,7 @@ use_col = [
     "rec1_purchase_amount_count",  # 0.005
     "old_month_lag_max",  # 0.002
     "new_time_diff_mean", "new_trans_elapsed_days_std",  # 0.002
-    "old_month_diff_mean", "old_pa2_month_diff_min",  # 0.004
+    #"old_month_diff_mean", "old_pa2_month_diff_min",  # 0.004
 ]
 use_col += [
     # "old_first_buy", "old_last_buy" worse
@@ -68,53 +67,41 @@ use_col += [
     # "new_purchase_amount_sum", "old_purchase_amount_sum",  # 0.0005?
     # "old_time_diff_std" worse
 ]
-train_x = train[use_col]
-test_x = test[use_col]
+train_x = train.drop(columns=["card_id", "target"])
+test_x = test.drop(columns=["card_id"])
+train["tt"] = 0
+test["tt"] = 1
+train_y = train["tt"]
+test_y = test["tt"]
+all_x = pd.concat([train_x, test_x], axis=0)
+all_y = pd.concat([train_y, test_y], axis=0)
 
 timer.time("prepare train in ")
 print(train_x.shape)
-print(train_y.shape)
 print(test_x.shape)
+print(all_x.shape)
+print(all_y.shape)
 
-
-submission = pd.DataFrame()
-submission["card_id"] = test["card_id"]
-submission["target"] = 0
-train_cv = pd.DataFrame()
-train_cv["card_id"] = train["card_id"]
-train_cv["cv_pred"] = 0
-
-outliers = (train["target"] < -30).astype(int).values
 bagging_num = 1
 split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
     logger.print("random_state=" + str(99*bagging_index))
-    lgb = pocket_lgb.GoldenLgb()
+    lgb = pocket_lgb.AdversarialLgb()
     total_score = 0
     models = []
     train_preds = []
-    for train_index, test_index in skf.split(train, outliers):
-        X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
-        y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
+    for train_index, test_index in skf.split(all_x, all_y):
+        X_train, X_test = all_x.iloc[train_index], all_x.iloc[test_index]
+        y_train, y_test = all_y.iloc[train_index], all_y.iloc[test_index]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
-        score = model.best_score["valid_0"]["rmse"]
+        score = model.best_score["valid_0"]["auc"]
         total_score += score
         y_pred = model.predict(test_x)
         valid_set_pred = model.predict(X_test)
         models.append(model)
-
-        submission["target"] = submission["target"] + y_pred
-        train_id = train.iloc[test_index]
-        train_cv_prediction = pd.DataFrame()
-        train_cv_prediction["card_id"] = train_id["card_id"]
-        train_cv_prediction["cv_pred"] = valid_set_pred
-        train_preds.append(train_cv_prediction)
         timer.time("done one set in")
-
-    train_output = pd.concat(train_preds, axis=0)
-    train_cv["cv_pred"] += train_output["cv_pred"]
 
     lgb.show_feature_importance(models[0], path_const.FEATURE_GAIN)
     avg_score = str(total_score / split_num)
@@ -122,19 +109,5 @@ for bagging_index in range(bagging_num):
     timer.time("end train in ")
 
 
-submission["target"] = submission["target"] / (bagging_num * split_num)
-submission.to_csv(path_const.OUTPUT_SUB, index=False)
 
-train_cv["cv_pred"] = train_cv["cv_pred"] / bagging_num
-train_cv.to_csv(path_const.OUTPUT_OOF, index=False)
-
-y_true = train_y
-y_pred = train_cv["cv_pred"]
-rmse_score = evaluator.rmse(y_true, y_pred)
-logger.print("evaluator rmse score= " + str(rmse_score))
-
-print(train["target"].describe())
-logger.print(train_cv.describe())
-logger.print(submission.describe())
-timer.time("done submission in ")
 

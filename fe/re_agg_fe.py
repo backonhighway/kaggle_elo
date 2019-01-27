@@ -74,10 +74,10 @@ class ReAggFe:
             "no_city": ["mean", "count"],
             # "inst_pur": ["mean"],
             # "inst_pur2": ["mean"],
-            "pa2": ["max", "min", "mean", "std", "sum"],
+            "pa2": ["mean", "sum"],  # min, std, max
         }
         old_aggs = {
-            "authorized_flag": ["mean", "sum", "min", "max"],
+            "authorized_flag": ["mean", "sum"],
             "month": ["nunique"],
             "woy": ["nunique"],
             "hour": ["nunique"],

@@ -19,7 +19,7 @@ class GoldenLgb:
         #     'verbose': 0,
         # }
         self.train_param = {
-            'num_leaves': 31,
+            'num_leaves': 3,
             'min_data_in_leaf': 30,
             'objective': 'regression',
             'max_depth': -1,
@@ -85,14 +85,15 @@ class GoldenLgb:
             fi.to_csv(filename, index=False, mode="a")
 
 
-class AdversarialLgb:
+class AdversarialLgb(GoldenLgb):
     def __init__(self, seed=99, cat_col=pred_cols.CAT_COLS):
+        super().__init__()
         self.train_param = {
-            'learning_rate': 0.05,
+            'learning_rate': 0.02,
             'num_leaves': 31,
             'boosting': 'gbdt',
             'application': 'binary',
-            'metric': 'AUC',
+            'metric': 'binary_logloss',
             'feature_fraction': .7,
             #"max_bin": 511,
             'seed': seed,
@@ -101,8 +102,6 @@ class AdversarialLgb:
         self.target_col_name = "target"
         if cat_col is not None:
             self.category_col = cat_col
-        self.drop_cols = [
-        ]
 
     def do_train_direct(self, x_train, x_test, y_train, y_test):
         lgb_train = lgb.Dataset(x_train, y_train)

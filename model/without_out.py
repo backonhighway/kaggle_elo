@@ -40,6 +40,8 @@ fer = jit_fe.JitFe()
 train = fer.do_fe(train)
 test = fer.do_fe(test)
 
+train = train[train["target"] > -30]
+
 train_y = train["target"]
 # 3.660 - 3.658
 use_col = [
@@ -53,6 +55,7 @@ use_col = [
     "new_purchase_amount_max", "new_purchase_amount_count", "new_purchase_amount_mean",  # 0.020
     "old_purchase_amount_max", "old_purchase_amount_count", "old_purchase_amount_mean",  # 0.002
     "old_category_1_mean", "new_category_1_mean",  # 0.006
+    "old_authorized_flag_sum",  # "old_authorized_flag_mean", bad?
     "old_authorized_flag_sum",  # "old_authorized_flag_mean", bad?
     "old_no_city_purchase_amount_min",  # 0.003
     "old_no_city_purchase_amount_max", "old_no_city_purchase_amount_mean",  # 0.002
