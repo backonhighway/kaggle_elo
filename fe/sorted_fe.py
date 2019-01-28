@@ -13,8 +13,8 @@ class SortedFe:
         ret_df = self._do_day(df)
 
         # probably noise, but not bad
-        # time_df = self._do_time_diff(df)
-        # ret_df = pd.merge(ret_df, time_df, on="card_id", how="left")
+        time_df = self._do_time_diff(df)
+        ret_df = pd.merge(ret_df, time_df, on="card_id", how="left")
 
         # auth_df = self._do_auth(df)
         # ret_df = pd.merge(ret_df, auth_df, on="card_id", how="left")

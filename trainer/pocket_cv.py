@@ -11,6 +11,8 @@ class GoldenTrainer:
         self.batch_size = batch_size
 
     def do_cv(self, data):
+        for d in data:
+            print(d.shape)
         train, test, train_x, train_y, test_x = data
         timer = pocket_timer.GoldenTimer(self.logger)
 
@@ -30,7 +32,6 @@ class GoldenTrainer:
             mlp = pocket_network.GoldenMlp(self.epochs, self.batch_size)
             network = mlp.build_model()
             total_score = 0
-            models = []
             train_preds = []
             for train_index, test_index in skf.split(train, outliers):
                 X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
@@ -42,11 +43,11 @@ class GoldenTrainer:
                 print('Loading Best Model')
                 model.load_weights(path_const.WEIGHT_FILE)
 
-                y_pred = model.predict(test_x)
-                valid_set_pred = model.predict(X_test)
+                y_pred = model.predict(test_x, batch_size=self.batch_size)
+                valid_set_pred = model.predict(X_test, batch_size=self.batch_size)
                 score = evaluator.rmse(y_test, valid_set_pred)
+                print(score)
                 total_score += score
-                models.append(model)
 
                 submission["target"] = submission["target"] + y_pred
                 train_id = train.iloc[test_index]

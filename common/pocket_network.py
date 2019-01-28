@@ -18,17 +18,24 @@ class GoldenMlp:
     def build_model(self):
         network = GoldenNetwork()
         model = network.build_single_input()
-        model.compile(loss="mean_squared_error", optimizer='adam', metrics=['rmse'])
+        model.compile(loss="mean_squared_error", optimizer='adam', metrics=['mse'])
         return model
 
     def do_train_direct(self, model, train_x, valid_x, train_y, valid_y):
-        check_point = ModelCheckpoint(path_const.SUB_DIR, monitor='val_loss', mode='min', save_best_only=True, verbose=0)
+        print(train_x.shape)
+        print(valid_x.shape)
+        print(train_y.shape)
+        print(valid_y.shape)
+        check_point = ModelCheckpoint(
+            path_const.WEIGHT_FILE,
+            monitor='val_loss', mode='min', save_best_only=True, verbose=0
+        )
         es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
 
         history = model.fit(train_x, train_y,
                             validation_data=[valid_x, valid_y],
                             epochs=self.epochs, batch_size=self.batch_size,
-                            shuffle=True, verbose=0,
+                            shuffle=True, verbose=1,
                             callbacks=[check_point, es])
         return model, history
 
@@ -59,7 +66,7 @@ class GoldenNetwork:
 
     @staticmethod
     def build_single_input():
-        meta_features = 8  # hostgal_photoz, mwebv
+        meta_features = 33
         mi = Input(shape=(meta_features,))
         m = Dense(128)(mi)
         m = BatchNormalization()(m)

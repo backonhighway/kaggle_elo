@@ -56,7 +56,9 @@ OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
 FEATURE_GAIN = os.path.join(OUTPUT_DIR, "feature_gain.csv")
 
 # revenge NN
-WEIGHT_FILE = "./keras.model"
+WEIGHT_FILE = os.path.join(OUTPUT_DIR, "keras.model")
+CHECK_POINT_FILE = os.path.join(OUTPUT_DIR, "checkpoint.h5")
+
 
 
 
