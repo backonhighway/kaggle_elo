@@ -13,3 +13,14 @@ only use new merchants in old
 graph match cards?
 newly opened merchants?
 cat2 mean... most freq?
+
+
+
+    # Gauss Rank transformation
+    for col in trafo_columns:
+        values = sorted(set(X[col]))
+        # Because erfinv(1) is inf, we shrink the range into (-0.9, 0.9)
+        f = pd.Series(np.linspace(-0.9, 0.9, len(values)), index=values)
+        f = np.sqrt(2) * erfinv(f)
+        f -= f.mean()
+        X[col] = X[col].map(f)

@@ -64,17 +64,24 @@ class GoldenNetwork:
             "most_recent_purchases_range": (5, 3)
         }
 
+
     @staticmethod
     def build_single_input():
         meta_features = 33
         mi = Input(shape=(meta_features,))
-        m = Dense(128)(mi)
+        m = Dense(256)(mi)
+        m = PReLU()(m)
         m = BatchNormalization()(m)
         m = Dropout(0.20)(m)
-        c = Dense(32)(m)
-        c = BatchNormalization()(c)
-        c = Dropout(0.20)(c)
-        op = Dense(1, activation="sigmoid")(c)
+        m = Dense(128)(m)
+        m = PReLU()(m)
+        m = BatchNormalization()(m)
+        m = Dropout(0.20)(m)
+        m = Dense(64)(m)
+        m = PReLU()(m)
+        m = BatchNormalization()(m)
+        m = Dropout(0.05)(m)
+        op = Dense(1, activation="linear")(m)
 
         model = Model(inputs=[mi], output=op)
         print(model.summary())
