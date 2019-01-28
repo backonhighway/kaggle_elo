@@ -71,7 +71,7 @@ class GoldenLoader:
         print(test_x.shape)
         timer.time("prepare train in ")
 
-        return train, test, train_x, train_y, test_x
+        return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
     @staticmethod
     def load_large_input():
