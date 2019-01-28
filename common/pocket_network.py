@@ -3,6 +3,39 @@ from keras.layers import concatenate, Conv1D, Flatten, MaxPooling1D, GlobalMaxPo
 from keras.layers import Lambda, Embedding, GaussianDropout, Reshape
 from keras import Model
 from keras.engine import Input
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras import backend as K
+import pandas as pd
+from elo.common import path_const
+
+
+class GoldenMlp:
+    def __init__(self, epochs=100, batch_size=512):
+        K.clear_session()
+        self.epochs = epochs
+        self.batch_size = batch_size
+
+    def build_model(self):
+        network = GoldenNetwork()
+        model = network.build_single_input()
+        model.compile(loss="mean_squared_error", optimizer='adam', metrics=['rmse'])
+        return model
+
+    def do_train_direct(self, model, train_x, valid_x, train_y, valid_y):
+        check_point = ModelCheckpoint(path_const.SUB_DIR, monitor='val_loss', mode='min', save_best_only=True, verbose=0)
+        es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
+
+        history = model.fit(train_x, train_y,
+                            validation_data=[valid_x, valid_y],
+                            epochs=self.epochs, batch_size=self.batch_size,
+                            shuffle=True, verbose=0,
+                            callbacks=[check_point, es])
+        return model, history
+
+    def save_history(self, history, file_name_suffix):
+        history_ = pd.DataFrame(history.history)
+        history_filename = "_".join(["history", file_name_suffix, ".csv"])
+        history_.to_csv(history_filename)
 
 
 class GoldenNetwork:
@@ -23,6 +56,23 @@ class GoldenNetwork:
             "most_recent_sales_range": (5, 3),
             "most_recent_purchases_range": (5, 3)
         }
+
+    @staticmethod
+    def build_single_input():
+        meta_features = 8  # hostgal_photoz, mwebv
+        mi = Input(shape=(meta_features,))
+        m = Dense(128)(mi)
+        m = BatchNormalization()(m)
+        m = Dropout(0.20)(m)
+        c = Dense(32)(m)
+        c = BatchNormalization()(c)
+        c = Dropout(0.20)(c)
+        op = Dense(1, activation="sigmoid")(c)
+
+        model = Model(inputs=[mi], output=op)
+        print(model.summary())
+        return model
+
 
     def build_bestfitting_nn(self):
         cat_in = Input(shape=(len(self.base_cat),))

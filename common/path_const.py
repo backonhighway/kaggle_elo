@@ -55,7 +55,8 @@ OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
 
 FEATURE_GAIN = os.path.join(OUTPUT_DIR, "feature_gain.csv")
 
-
+# revenge NN
+WEIGHT_FILE = "./keras.model"
 
 
 
