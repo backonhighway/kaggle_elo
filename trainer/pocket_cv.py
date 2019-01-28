@@ -2,6 +2,7 @@ from elo.common import pocket_timer, pocket_logger, path_const, evaluator
 from elo.common import pocket_network
 from sklearn import model_selection
 import pandas as pd
+import numpy as np
 
 
 class GoldenTrainer:
@@ -44,6 +45,7 @@ class GoldenTrainer:
                 model.load_weights(path_const.WEIGHT_FILE)
 
                 y_pred = model.predict(test_x, batch_size=self.batch_size)
+                y_pred = np.reshape(y_pred, -1)
                 valid_set_pred = model.predict(X_test, batch_size=self.batch_size)
                 score = evaluator.rmse(y_test, valid_set_pred)
                 print(score)

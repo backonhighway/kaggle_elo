@@ -29,6 +29,6 @@ print(train_x.describe())
 
 data = (train, test, train_x, train_y, test_x)
 
-trainer = pocket_cv.GoldenTrainer(epochs=20, batch_size=512)
+trainer = pocket_cv.GoldenTrainer(epochs=100, batch_size=512)
 trainer.do_cv(data)
 timer.time("done train")
