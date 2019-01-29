@@ -29,6 +29,11 @@ TT_NUM = os.path.join(NN_DIR, "tt_num.npy")
 TT_CAT = os.path.join(NN_DIR, "tt_cat.npy")
 HT_NUM = os.path.join(NN_DIR, "ht_num.npy")
 HT_CAT = os.path.join(NN_DIR, "ht_cat.npy")
+NEW_NUM = os.path.join(NN_DIR, "new_num.npy")
+NEW_CAT = os.path.join(NN_DIR, "new_cat.npy")
+NEW_KEY = os.path.join(NN_DIR, "new_key.npy")
+OLD_NUM = os.path.join(NN_DIR, "old_num.npy")
+OLD_CAT = os.path.join(NN_DIR, "old_cat.npy")
 
 # For LGBM
 OLD_TRANS1 = os.path.join(INPUT_DIR, "old_trans1.csv")
@@ -55,10 +60,16 @@ OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
 
 FEATURE_GAIN = os.path.join(OUTPUT_DIR, "feature_gain.csv")
 
-# revenge NN
-WEIGHT_FILE = os.path.join(OUTPUT_DIR, "keras.model")
-CHECK_POINT_FILE = os.path.join(OUTPUT_DIR, "checkpoint.h5")
 
+# NN
+def get_weight_file(suffix):
+    filename = "keras_" + suffix + ".model"
+    return os.path.join(OUTPUT_DIR, filename)
+
+
+def get_history_file(suffix):
+    filename = "history_" + suffix + ".csv"
+    return os.path.join(OUTPUT_DIR, filename)
 
 
 

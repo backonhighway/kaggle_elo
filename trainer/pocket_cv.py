@@ -1,5 +1,5 @@
 from elo.common import pocket_timer, pocket_logger, path_const, evaluator
-from elo.common import pocket_network
+from elo.common import pocket_network, learning_rate
 from sklearn import model_selection
 import pandas as pd
 import numpy as np
@@ -30,19 +30,21 @@ class GoldenTrainer:
         for bagging_index in range(bagging_num):
             skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
             self.logger.print("random_state=" + str(99*bagging_index))
-            mlp = pocket_network.GoldenMlp(self.epochs, self.batch_size)
-            network = mlp.build_model()
+            lr_schedule = learning_rate.GoldenLearningRate(0.01, self.epochs).cosine_annealing_scheduler()
+
             total_score = 0
             train_preds = []
             for idx, (train_index, test_index) in enumerate(skf.split(train, outliers)):
+                mlp = pocket_network.GoldenMlp(self.epochs, self.batch_size)
+                network = mlp.build_model()
                 X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
                 y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
                 print("start train")
-                model, history = mlp.do_train_direct(network, X_train, X_test, y_train, y_test)
+                model, history = mlp.do_train_direct(str(idx), network, X_train, X_test, y_train, y_test)
                 mlp.save_history(history, str(idx))
                 print('Loading Best Model')
-                model.load_weights(path_const.WEIGHT_FILE)
+                model.load_weights(path_const.get_weight_file(str(idx)))
 
                 y_pred = model.predict(test_x, batch_size=self.batch_size)
                 y_pred = np.reshape(y_pred, -1)

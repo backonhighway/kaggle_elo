@@ -118,3 +118,38 @@ class AdversarialLgb(GoldenLgb):
         print('End training...')
         return model
 
+
+class ShallowLgb(GoldenLgb):
+    def __init__(self, seed=99, cat_col=pred_cols.CAT_COLS):
+        super().__init__()
+        self.train_param = {
+            'learning_rate': 0.02,
+            'num_leaves': 4,
+            "max_depth": 2,
+            'boosting': 'gbdt',
+            'application': 'regression',
+            'metric': 'rmse',
+            'feature_fraction': .9,
+            #"max_bin": 511,
+            'seed': seed,
+            'verbose': 0,
+        }
+        self.target_col_name = "target"
+        self.category_col = cat_col
+        self.drop_cols = [
+        ]
+
+    def do_train_direct(self, x_train, x_test, y_train, y_test):
+        lgb_train = lgb.Dataset(x_train, y_train)
+        lgb_eval = lgb.Dataset(x_test, y_test)
+
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=[lgb_eval],
+                          verbose_eval=100,
+                          num_boost_round=300,
+                          early_stopping_rounds=100,
+                          categorical_feature=self.category_col)
+        print('End training...')
+        return model

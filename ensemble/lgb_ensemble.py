@@ -20,13 +20,25 @@ train2 = csv_io.read_file("../sub/small_oof.csv")
 test2 = csv_io.read_file("../sub/small_sub.csv")
 train3 = csv_io.read_file("../sub/big_oof.csv")
 test3 = csv_io.read_file("../sub/big_sub.csv")
+train4 = csv_io.read_file("../sub/mlp3_oof.csv")
+test4 = csv_io.read_file("../sub/mlp3_sub.csv")
+train1.columns = ["card_id", "bin"]
+train2.columns = ["card_id", "small"]
+train3.columns = ["card_id", "big"]
+train4.columns = ["card_id", "mlp"]
+test1.columns = ["card_id", "bin"]
+test2.columns = ["card_id", "small"]
+test3.columns = ["card_id", "big"]
+test4.columns = ["card_id", "mlp"]
 timer.time("load csv in ")
 
 train = pd.merge(train, train1, on="card_id", how="left")
 train = pd.merge(train, train2, on="card_id", how="left")
 train = pd.merge(train, train3, on="card_id", how="left")
+train = pd.merge(train, train4, on="card_id", how="left")
 test = pd.merge(test1, test2, on="card_id", how="left")
 test = pd.merge(test, test3, on="card_id", how="left")
+test = pd.merge(test, test4, on="card_id", how="left")
 
 train_y = train["target"]
 train_x = train.drop(columns=["card_id", "target"])
@@ -51,7 +63,7 @@ split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
     logger.print("random_state=" + str(99*bagging_index))
-    lgb = pocket_lgb.GoldenLgb()
+    lgb = pocket_lgb.ShallowLgb()
     total_score = 0
     models = []
     train_preds = []
