@@ -5,6 +5,7 @@ from keras import Model
 from keras.engine import Input
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras import backend as K
+from keras import optimizers
 import pandas as pd
 from elo.common import path_const
 
@@ -19,7 +20,8 @@ class GoldenMlp:
     def build_model(self):
         network = GoldenNetwork()
         model = network.build_single_input()
-        model.compile(loss="mean_squared_error", optimizer='sgd', metrics=['mse'])
+        sgd = optimizers.SGD(lr=0.1)
+        model.compile(loss="mean_squared_error", optimizer=sgd, metrics=['mse'])
         return model
 
     def do_train_direct(self, fold, model, train_x, valid_x, train_y, valid_y):
@@ -31,7 +33,7 @@ class GoldenMlp:
             path_const.get_weight_file(str(fold)),
             monitor='val_loss', mode='min', save_best_only=True, verbose=0
         )
-        es = EarlyStopping(monitor="val_loss", patience=20, verbose=1)
+        es = EarlyStopping(monitor="val_loss", patience=30, verbose=1)
         callbacks = [check_point, es]
         if self.lr_scheduler is not None:
             callbacks.append(self.lr_scheduler)
@@ -69,7 +71,7 @@ class GoldenNetwork:
 
 
     @staticmethod
-    def build_single_input():
+    def build_single_input(verbose=False):
         meta_features = 33
         mi = Input(shape=(meta_features,))
         m = Dense(512)(mi)
@@ -91,7 +93,8 @@ class GoldenNetwork:
         op = Dense(1, activation="linear")(m)
 
         model = Model(inputs=[mi], output=op)
-        print(model.summary())
+        if verbose:
+            print(model.summary())
         return model
 
 
