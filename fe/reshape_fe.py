@@ -12,13 +12,33 @@ class GoldenReshaper:
             "merchant_category_id", "state_id", "subsector_id", "category_2"
         ]
         self.num_col = [
-            "authorized_flag", "no_city", "category_1", "installments",
-            "month_lag", "purchase_amount", "day"
+            "no_city", "category_1", "installments",
+            "month_lag", "purchase_amount", "day",
+            # "authorized_flag"
         ]
 
     def do_para_reshape(self, ts):
+        ts = self._do_prep(ts)
+        ts = self._do_scale(ts)
+        use_col = ["card_id"] + self.cat_col + self.num_col
+        ts = ts[use_col].round(8).copy()
+        print(ts.shape)
+        print(ts.head())
         ts_num, ts_cat, ts_key = self._do_para_reshape(ts)
         return ts_num, ts_cat, ts_key
+
+    @staticmethod
+    def _do_prep(df):
+        df = df.sort_values(by=["card_id", "purchase_date"])
+        # df['authorized_flag'] = df['authorized_flag'].map({'Y': 0, 'N': 1})
+        df['category_1'] = df['category_1'].map({'Y': 1, 'N': 0})
+        df["no_city"] = np.where(df["city_id"] == -1, 1, 0)
+        df["day"] = df['purchase_date'].dt.day
+        return df
+
+    def _do_scale(self, df):
+        df = pocket_scaler.rank_gauss(df, self.num_col, verbose=True).fillna(0)
+        return df
 
     def _do_para_reshape(self, trans):
         split_trans = self._split_series(trans)
@@ -49,33 +69,22 @@ class GoldenReshaper:
         return split_series
 
     def _do_reshape(self, trans):
-        trans = self._do_prep(trans)
-        trans = self._do_scale(trans)
         trans_num, num_keys = self.reshape(trans, self.num_col)
         trans_cat, cat_keys = self.reshape(trans, self.cat_col)
+        print("done reshape")
         for kn, kc in zip(num_keys, cat_keys):
             assert kn == kc
             if kn != kc:
                 print("omg")
+            else:
+                print("ok")
+            break
         return trans_num, trans_cat, np.array(num_keys)
-
-    @staticmethod
-    def _do_prep(df):
-        df = df.sort_values(["card_id", "purchase_date"])
-        df['authorized_flag'] = df['authorized_flag'].map({'Y': 0, 'N': 1})
-        df['category_1'] = df['category_1'].map({'Y': 1, 'N': 0})
-        df["no_city"] = np.where(df["city_id"] == -1, 1, 0)
-        df["day"] = df['purchase_date'].dt.day
-        return df
-
-    def _do_scale(self, df):
-        df = pocket_scaler.rank_gauss(df, self.num_col)
-        return df
 
     @staticmethod
     def reshape(df, use_col):
         sample_size = df["card_id"].nunique()
-        time_step = 120  # maximum length
+        time_step = 109  # maximum length
         features = len(use_col)
         ret_shape = (sample_size, time_step, features)
         ret_array = np.zeros(ret_shape)  # sample_size, time_step, features
@@ -83,12 +92,13 @@ class GoldenReshaper:
         single_shape = (time_step, features)
         keys = df["card_id"].unique()
         max_len = 0
+        print("start reshape-loop")
         for i, the_key in enumerate(keys):
             df_ = df[df["card_id"] == the_key]
             res = df_[use_col].values
             desired = np.zeros(single_shape)
+            max_len = max(res.shape[0], max_len)
             if res.shape[0] > time_step:
-                max_len = max(res.shape[0], max_len)
                 desired = res[:time_step, :res.shape[1]]
             else:
                 desired[:res.shape[0], :res.shape[1]] = res
