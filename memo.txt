@@ -13,14 +13,16 @@ only use new merchants in old
 graph match cards?
 newly opened merchants?
 cat2 mean... most freq?
+----------------------------
+01/31
+how many counts each month? ratio?
+count of purchase amount > 0.8
+cleaner features: old-new fe, get the last probable purchase-date, days from it.
+cleaner amount: min install as base, then sum the install
+
+drop duplicates keep first merchant, how many merchants each month?
 
 
+predict the count/last day of new from old
 
-    # Gauss Rank transformation
-    for col in trafo_columns:
-        values = sorted(set(X[col]))
-        # Because erfinv(1) is inf, we shrink the range into (-0.9, 0.9)
-        f = pd.Series(np.linspace(-0.9, 0.9, len(values)), index=values)
-        f = np.sqrt(2) * erfinv(f)
-        f -= f.mean()
-        X[col] = X[col].map(f)
+
