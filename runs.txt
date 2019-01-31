@@ -34,3 +34,102 @@ fix target-encode
 local=3.6555561490437922
 LB=3.697, gap=0.042
 
+-----------------
+outlier 0/1
+average score= 0.9021824951842179 (bin=0.044)
+                                name  importance_split  importance_gain
+31               old_month_diff_mean               314            26928
+9                  old_month_nunique               362            21582
+1         new_trans_elapsed_days_min               337            16964
+4         old_trans_elapsed_days_min               334            14880
+6                    new_to_last_day               317            12600
+32            old_pa2_month_diff_min                36            10913
+7               old_installments_sum               245             8977
+30        new_trans_elapsed_days_std               357             8051
+21               old_category_1_mean               197             7423
+27        rec1_purchase_amount_count               361             6848
+23           old_authorized_flag_sum               308             6103
+24   old_no_city_purchase_amount_min               257             6056
+3         old_trans_elapsed_days_max               478             6052
+11           old_merchant_id_nunique               338             4896
+13                old_month_lag_mean               340             4737
+8              old_installments_mean               284             4596
+10                   old_woy_nunique               268             4577
+29                new_time_diff_mean               332             4532
+18           old_purchase_amount_max               317             4362
+14                      elapsed_days               298             4144
+19         old_purchase_amount_count               337             4082
+2        new_trans_elapsed_days_mean               212             4068
+20          old_purchase_amount_mean               294             4037
+5        old_trans_elapsed_days_mean               313             3977
+25   old_no_city_purchase_amount_max               222             3572
+17          new_purchase_amount_mean               254             3348
+0         new_trans_elapsed_days_max               261             3298
+26  old_no_city_purchase_amount_mean               240             3248
+15           new_purchase_amount_max               234             3129
+22               new_category_1_mean               137             2748
+12                new_month_lag_mean               139             2684
+16         new_purchase_amount_count               169             2569
+28                 old_month_lag_max                18               92
+
+
+-----------------
+no outlier
+average score= 1.5574589237954155
+                                name  importance_split  importance_gain
+15           new_purchase_amount_max              4976          1269294
+16         new_purchase_amount_count              1318           456071
+31        new_trans_elapsed_days_std              2558           455046
+20          old_purchase_amount_mean              4691           320592
+17          new_purchase_amount_mean              3702           262107
+11           old_merchant_id_nunique              4231           261446
+30                new_time_diff_mean              2539           224294
+2        new_trans_elapsed_days_mean              1728           195478
+18           old_purchase_amount_max              3506           165099
+28        rec1_purchase_amount_count              2937           145607
+8              old_installments_mean              2509           144835
+0         new_trans_elapsed_days_max              2002           127814
+10                   old_woy_nunique              2196           124140
+19         old_purchase_amount_count              2806           111817
+4         old_trans_elapsed_days_min              2707           106901
+32               old_month_diff_mean              2497            97883
+12                new_month_lag_mean              1447            94881
+13                old_month_lag_mean              2943            91837
+9                  old_month_nunique              1436            82249
+6                       new_last_day              1981            72279
+7               old_installments_sum              1718            71105
+5        old_trans_elapsed_days_mean              2237            70236
+21               old_category_1_mean              1836            68886
+3         old_trans_elapsed_days_max              2135            68045
+1         new_trans_elapsed_days_min              1657            65104
+23           old_authorized_flag_sum              1747            61661
+26   old_no_city_purchase_amount_max              1926            55904
+27  old_no_city_purchase_amount_mean              1817            55090
+14                      elapsed_days              1504            46797
+25   old_no_city_purchase_amount_min              1580            45044
+22               new_category_1_mean               742            22289
+29                 old_month_lag_max               373            20665
+33            old_pa2_month_diff_min               131            12306
+24           old_authorized_flag_sum               227             7852
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

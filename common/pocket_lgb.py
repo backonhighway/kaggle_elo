@@ -93,7 +93,7 @@ class AdversarialLgb(GoldenLgb):
             'num_leaves': 31,
             'boosting': 'gbdt',
             'application': 'binary',
-            'metric': 'binary_logloss',
+            'metric': 'auc',
             'feature_fraction': .7,
             #"max_bin": 511,
             'seed': seed,

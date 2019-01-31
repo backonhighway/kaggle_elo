@@ -7,26 +7,26 @@ import numpy as np
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
 from elo.common import pocket_lgb, evaluator
 from elo.loader import input_loader
-from elo.fe import jit_fe
 from sklearn import model_selection
 
 logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 csv_io = pocket_file_io.GoldenCsv()
 
-data = input_loader.GoldenLoader().load_small_input()
+data = input_loader.GoldenLoader().load_small_pred_new()
+train, test, train_x, train_y, test_x = data
+print(train_x.shape)
+print(train_y.shape)
+print(test_x.shape)
 timer.time("load csv")
 
-# do scaling
-train, test, train_x, train_y, test_x = data
-train_y = (train_y < -30).astype(int)
-
+pred_col_name = "pred_new"
 submission = pd.DataFrame()
 submission["card_id"] = test["card_id"]
-submission["target"] = 0
+submission[pred_col_name] = 0
 train_cv = pd.DataFrame()
 train_cv["card_id"] = train["card_id"]
-train_cv["cv_pred"] = 0
+train_cv[pred_col_name] = 0
 
 outliers = (train["target"] < -30).astype(int).values
 bagging_num = 1
@@ -34,7 +34,7 @@ split_num = 4
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
     logger.print("random_state=" + str(99*bagging_index))
-    lgb = pocket_lgb.AdversarialLgb()
+    lgb = pocket_lgb.GoldenLgb()
     total_score = 0
     models = []
     train_preds = []
@@ -43,7 +43,7 @@ for bagging_index in range(bagging_num):
         y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
-        score = model.best_score["valid_0"]["auc"]
+        score = model.best_score["valid_0"]["rmse"]
         total_score += score
         y_pred = model.predict(test_x)
         valid_set_pred = model.predict(X_test)
@@ -53,12 +53,12 @@ for bagging_index in range(bagging_num):
         train_id = train.iloc[test_index]
         train_cv_prediction = pd.DataFrame()
         train_cv_prediction["card_id"] = train_id["card_id"]
-        train_cv_prediction["cv_pred"] = valid_set_pred
+        train_cv_prediction[pred_col_name] = valid_set_pred
         train_preds.append(train_cv_prediction)
         timer.time("done one set in")
 
     train_output = pd.concat(train_preds, axis=0)
-    train_cv["cv_pred"] += train_output["cv_pred"]
+    train_cv[pred_col_name] += train_output[pred_col_name]
 
     lgb.show_feature_importance(models[0], path_const.FEATURE_GAIN)
     avg_score = str(total_score / split_num)
@@ -66,18 +66,18 @@ for bagging_index in range(bagging_num):
     timer.time("end train in ")
 
 
-submission["target"] = submission["target"] / (bagging_num * split_num)
-submission.to_csv(path_const.OUTPUT_SUB, index=False)
+submission[pred_col_name] = submission[pred_col_name] / (bagging_num * split_num)
+submission.to_csv(path_const.NEW_DAY_PRED_SUB, index=False)
 
-train_cv["cv_pred"] = train_cv["cv_pred"] / bagging_num
-train_cv.to_csv(path_const.OUTPUT_OOF, index=False)
+train_cv[pred_col_name] = train_cv[pred_col_name] / bagging_num
+train_cv.to_csv(path_const.NEW_DAY_PRED_OOF, index=False)
 
 y_true = train_y
-y_pred = train_cv["cv_pred"]
+y_pred = train_cv[pred_col_name]
 rmse_score = evaluator.rmse(y_true, y_pred)
 logger.print("evaluator rmse score= " + str(rmse_score))
 
-print(train["target"].describe())
+print(train[pred_col_name].describe())
 logger.print(train_cv.describe())
 logger.print(submission.describe())
 timer.time("done submission in ")

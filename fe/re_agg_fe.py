@@ -16,6 +16,8 @@ class ReAggFe:
         ret_df = pd.merge(ret_df, nan_feats, on="card_id", how="left")
         time_feats = self.do_time_feats(df)
         ret_df = pd.merge(ret_df, time_feats, on="card_id", how="left")
+        # mon_df = self._do_monthly_count(df)
+        # ret_df = pd.merge(ret_df, mon_df, on="card_id", how="left")
         if self.prefix == "old":
             cond_df = self.do_conditional(df)
             ret_df = pd.merge(ret_df, cond_df, on="card_id", how="left")
@@ -52,6 +54,10 @@ class ReAggFe:
         df['month_diff'] = (datetime.datetime.today() - df['purchase_date']).dt.days // 30
         df['month_diff'] += df['month_lag']
         df["pa2_month_diff"] = df["pa2"] * df["month_diff"]
+        df["inst2"] = np.where(df["installments"] < 0, np.NaN, df["installments"])
+        df["min_inst2"] = df.groupby("card_id")["inst2"].transform("min")
+        df["inst2"] = np.where(df["min_inst2"] == 0, df["inst2"]+1, df["inst2"])
+        df["big_pur"] = np.where(df["purchase_amount"] > 0.8, 1, 0)
 
         # low_days = ["2017-04-08", "2017-05-12", "2017-05-24", "2017-06-19", "2017-06-30"]
         # df["str_date"] = df["purchase_date"].dt.date.astype(str)
@@ -64,6 +70,8 @@ class ReAggFe:
             "city_id": ["nunique"],  # maybe the most frequent one?
             "category_1": ["mean"],
             "installments": ["mean", "sum"],
+            "inst2": ["mean", "sum"],
+            "big_pur": ["mean", "sum"],
             "category_3": ["mean"],
             "merchant_id": ["nunique"],
             "merchant_category_id": ["nunique"],  # maybe target encode or purchase encode?
@@ -239,9 +247,22 @@ class ReAggFe:
         ret_df.columns = ["card_id"] + cols
         return ret_df
 
+    def _do_monthly_count(self, df):
+        aggs = {}
+        if self.prefix == "old":
+            range_obj = range(-13, 1)
+        else:
+            range_obj = range(1, 3)
+        for i in range_obj:
+            col_name = "month" + str(i) + "_count"
+            df[col_name] = np.where(df["month_lag"] == i, 1, 0)
+            add_agg = {col_name: ["sum", "mean"]}
+            aggs.update(add_agg)
 
-
-
+        ret_agg = df.groupby(["card_id"]).agg(aggs).reset_index()
+        cols = ["_".join([self.prefix, k, agg]) for k in aggs.keys() for agg in aggs[k]]
+        ret_agg.columns = ["card_id"] + cols
+        return ret_agg
 
 
 

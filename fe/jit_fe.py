@@ -29,4 +29,8 @@ class JitFe:
 
         # df["new_last_day"] = df["new_last_day"].fillna(df["old_last_day"])
         df['old_CLV'] = df['old_purchase_amount_count'] * df['old_pa2_sum'] / df['old_month_diff_mean']
+
+        df["old_to_last_day"] = (df["old_month_lag_max"] * -30) + (31 - df["old_last_day"])
+        df["new_to_last_day"] = ((df["new_month_lag_max"] - 2) * -30) + (31 - df["new_last_day"])
+
         return df

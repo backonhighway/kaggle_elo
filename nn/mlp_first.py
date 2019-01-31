@@ -12,7 +12,7 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 csv_io = pocket_file_io.GoldenCsv()
 
-data = input_loader.GoldenLoader.load_small_input()
+data = input_loader.GoldenLoader().load_small_input()
 timer.time("load csv")
 
 # do scaling

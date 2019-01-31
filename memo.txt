@@ -26,3 +26,6 @@ drop duplicates keep first merchant, how many merchants each month?
 predict the count/last day of new from old
 
 
+lda the categories
+
+
