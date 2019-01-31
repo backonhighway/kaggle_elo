@@ -6,66 +6,93 @@ import pandas as pd
 import numpy as np
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
 from elo.common import pocket_lgb, evaluator
-from elo.utils import drop_col_util
 from sklearn.linear_model import LinearRegression
 
-logger = pocket_logger.get_my_logger()
-timer = pocket_timer.GoldenTimer(logger)
-csv_io = pocket_file_io.GoldenCsv()
 
-train = csv_io.read_file(path_const.ORG_TRAIN)[["card_id", "target"]]
-train1 = csv_io.read_file("../sub/big_oof.csv")
-test1 = csv_io.read_file("../sub/big_sub.csv")
-train2 = csv_io.read_file("../sub/small_oof.csv")
-test2 = csv_io.read_file("../sub/small_sub.csv")
-train3 = csv_io.read_file("../sub/mlp3_oof.csv")
-test3 = csv_io.read_file("../sub/mlp3_sub.csv")
-train4 = csv_io.read_file("../sub/mlp4_oof.csv")
-test4 = csv_io.read_file("../sub/mlp4_sub.csv")
-# train4 = csv_io.read_file("../sub/ker_oof.csv")
-# test4 = csv_io.read_file("../sub/ker_sub.csv")
-train5 = csv_io.read_file("../sub/mlp_rank_oof.csv")
-test5 = csv_io.read_file("../sub/mlp_rank_sub.csv")
-timer.time("load csv in ")
+class GoldenLr:
+    def __init__(self):
+        self.csv_io = pocket_file_io.GoldenCsv()
 
-print(train.shape)
-train1.columns = ["card_id", "big"]
-train2.columns = ["card_id", "small"]
-train3.columns = ["card_id", "mlp"]
-train4.columns = ["card_id", "mlp4"]
-train5.columns = ["card_id", "mlp_rank"]
-train = pd.merge(train, train1, on="card_id", how="inner")
-train = pd.merge(train, train2, on="card_id", how="inner")
-train = pd.merge(train, train3, on="card_id", how="inner")
-train = pd.merge(train, train4, on="card_id", how="inner")
-train = pd.merge(train, train5, on="card_id", how="inner")
-print(train.shape)
-print("-----")
+    def doit(self):
+        logger = pocket_logger.get_my_logger()
+        timer = pocket_timer.GoldenTimer(logger)
 
-print("co-eff...")
-print(train[["target", "big", "small", "mlp", "mlp4", "mlp_rank"]].corr())
+        # (file_name, col_name)
+        files = [
+            ("with_pred", "big"),
+            ("small", "small"),
+            ("mlp3", "mlp"),
+            # ("mlp_rank", "mlp_rank"),
+        ]
 
-print("before score..")
-score = evaluator.rmse(train["target"], train["big"])
-print(score)
-score = evaluator.rmse(train["target"], train["small"])
-print(score)
-score = evaluator.rmse(train["target"], train["mlp"])
-print(score)
-score = evaluator.rmse(train["target"], train["mlp4"])
-print(score)
-score = evaluator.rmse(train["target"], train["mlp_rank"])
-print(score)
-print("-----")
+        train, test = self.make_files(files)
+        timer.time("load csv in ")
 
-ensemble_col = ["big", "small", "mlp", "mlp4", "mlp_rank"]
-train_x = train[ensemble_col]
-reg = LinearRegression().fit(train_x, train["target"])
-print(reg.coef_)
-y_pred = reg.predict(train_x)
-score = evaluator.rmse(train["target"], y_pred)
-print(score)
+        self.print_corr(train, test, files)
+        timer.time("corr check")
+        self.print_score(train, files)
+        timer.time("score check")
+        self.do_preds(train, test, files)
 
+    def make_files(self, files):
+        train = self.csv_io.read_file(path_const.ORG_TRAIN)
+        train = train[["card_id", "target"]]
+        test = self.csv_io.read_file(path_const.ORG_TEST)
+        test = test[["card_id"]]
+
+        for f in files:
+            train, test = self.add_file(f[0], f[1], train, test)
+        return train, test
+
+    def add_file(self, file_name, col_name, org_train, org_test):
+        train_file_name = "../sub/" + file_name + "_oof.csv"
+        test_file_name = "../sub/" + file_name + "_sub.csv"
+        another_train = self.csv_io.read_file(train_file_name)
+        another_test = self.csv_io.read_file(test_file_name)
+        another_train.columns = ["card_id", col_name]
+        another_test.columns = ["card_id", col_name]
+        ret_train = pd.merge(org_train, another_train, on="card_id", how="inner")
+        ret_test = pd.merge(org_test, another_test, on="card_id", how="inner")
+        return ret_train, ret_test
+
+    @staticmethod
+    def print_corr(train, test, files):
+        print("correlation check...")
+        corr_col = ["target"] + [f[1] for f in files]
+        print(train[corr_col].corr())
+        test_corr_col = [f[1] for f in files]
+        print(test[test_corr_col].corr())
+
+    @staticmethod
+    def print_score(train, files):
+        for f in files:
+            score = evaluator.rmse(train["target"], train[f[1]])
+            print(score)
+
+    @staticmethod
+    def do_preds(train, test, files):
+        print("------- do preds --------")
+        ensemble_col = [f[1] for f in files]
+        train_x = train[ensemble_col]
+        reg = LinearRegression().fit(train_x, train["target"])
+        print(reg.coef_)
+        y_pred = reg.predict(train_x)
+        score = evaluator.rmse(train["target"], y_pred)
+        print(score)
+
+        test_x = test[ensemble_col]
+        y_pred = reg.predict(test_x)
+        sub = pd.DataFrame()
+        sub["card_id"] = test["card_id"]
+        sub["target"] = y_pred
+        print(train["target"].describe())
+        print(train["big"].describe())
+        print(sub["target"].describe())
+        sub.to_csv(path_const.OUTPUT_ENS, index=False)
+
+
+obj = GoldenLr()
+obj.doit()
 
 
 

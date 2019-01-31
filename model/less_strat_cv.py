@@ -72,7 +72,6 @@ drop_col = [
     # "old_subsector_id_target_encode_mean",
     # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
     "pred_new",
-    
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

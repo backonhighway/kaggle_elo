@@ -61,6 +61,7 @@ NEW_DAY_PRED_OOF = os.path.join(SUB_DIR, "new_day_pred_oof.csv")
 
 OUTPUT_SUB = os.path.join(SUB_DIR, "temp_sub.csv")
 OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
+OUTPUT_ENS = os.path.join(SUB_DIR, "temp_ens.csv")
 
 FEATURE_GAIN = os.path.join(OUTPUT_DIR, "feature_gain.csv")
 
