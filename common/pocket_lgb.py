@@ -35,7 +35,6 @@ class GoldenLgb:
             "verbosity": -1,
             "random_state": 4590
         }
-        self.target_col_name = "target"
         self.category_col = cat_col
         self.drop_cols = [
         ]

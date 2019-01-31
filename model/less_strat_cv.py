@@ -26,7 +26,6 @@ print(train.shape)
 print(test.shape)
 timer.time("load csv in ")
 
-
 train = pd.merge(train, new_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans, on="card_id", how="left")
 train = pd.merge(train, old_trans3, on="card_id", how="left")
@@ -40,12 +39,20 @@ test = pd.merge(test, old_trans3, on="card_id", how="left")
 test = pd.merge(test, new_trans6, on="card_id", how="left")
 test = pd.merge(test, old_trans6, on="card_id", how="left")
 test = pd.merge(test, old_trans9, on="card_id", how="left")
-# print(train.shape)
-# print(test.shape)
+
+print(train.shape)
+print(test.shape)
 #
 fer = jit_fe.JitFe()
 train = fer.do_fe(train)
 test = fer.do_fe(test)
+
+pred_train = csv_io.read_file(path_const.NEW_DAY_PRED_OOF)
+pred_test = csv_io.read_file(path_const.NEW_DAY_PRED_SUB)
+train = pd.merge(train, pred_train, on="card_id", how="left")
+train["pred_diff"] = train["pred_new"] - train["new_to_last_day"]
+test = pd.merge(test, pred_test, on="card_id", how="left")
+test["pred_diff"] = test["pred_new"] - test["new_to_last_day"]
 
 train_y = train["target"]
 drop_col = [
@@ -64,6 +71,8 @@ drop_col = [
     # "old_hour_target_encode_mean", "new_hour_target_encode_mean",
     # "old_subsector_id_target_encode_mean",
     # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
+    "pred_new",
+    
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

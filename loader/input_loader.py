@@ -29,6 +29,7 @@ class GoldenLoader:
             "old_month_lag_max",  # 0.002
             "new_time_diff_mean", "new_trans_elapsed_days_std",  # 0.002
             "old_month_diff_mean", "old_pa2_month_diff_min",  # 0.004
+            # "pred_diff"
         ]
 
         self.logger = pocket_logger.get_my_logger()
@@ -55,7 +56,7 @@ class GoldenLoader:
         test_x = test[pred_col]
         train_y = train["new_to_last_day"]
 
-        return train[["card_id", "target"]], test["card_id"], train_x, train_y, test_x
+        return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
     def load_whole_input(self):
         csv_io = pocket_file_io.GoldenCsv()
@@ -66,6 +67,7 @@ class GoldenLoader:
         old_trans = csv_io.read_file(path_const.RE_OLD_TRANS1)
         new_trans6 = csv_io.read_file(path_const.NEW_TRANS6)
         old_trans6 = csv_io.read_file(path_const.OLD_TRANS6)
+
         print(train.shape)
         print(test.shape)
         self.timer.time("load csv in ")
@@ -79,6 +81,14 @@ class GoldenLoader:
         test = pd.merge(test, old_trans, on="card_id", how="left")
         test = pd.merge(test, new_trans6, on="card_id", how="left")
         test = pd.merge(test, old_trans6, on="card_id", how="left")
+
+        # pred_train = csv_io.read_file(path_const.NEW_DAY_PRED_OOF)
+        # pred_test = csv_io.read_file(path_const.NEW_DAY_PRED_SUB)
+        # train = pd.merge(train, pred_train, on="card_id", how="left")
+        # train["pred_diff"] = train["pred_new"] - train["new_to_last_day"]
+        # test = pd.merge(test, pred_test, on="card_id", how="left")
+        # test["pred_diff"] = test["pred_new"] - test["new_to_last_day"]
+
         # print(train.shape)
         # print(test.shape)
         #

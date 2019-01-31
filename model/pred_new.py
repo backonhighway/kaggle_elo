@@ -18,7 +18,14 @@ train, test, train_x, train_y, test_x = data
 print(train_x.shape)
 print(train_y.shape)
 print(test_x.shape)
+print(train_y.describe())
+train_y = train_y.fillna(60)
 timer.time("load csv")
+
+mean_val = 6.040527
+train_x["mean_val"] = mean_val
+rmse_score = evaluator.rmse(train_y, train_x["mean_val"])
+print(rmse_score)
 
 pred_col_name = "pred_new"
 submission = pd.DataFrame()
@@ -49,7 +56,7 @@ for bagging_index in range(bagging_num):
         valid_set_pred = model.predict(X_test)
         models.append(model)
 
-        submission["target"] = submission["target"] + y_pred
+        submission[pred_col_name] = submission[pred_col_name] + y_pred
         train_id = train.iloc[test_index]
         train_cv_prediction = pd.DataFrame()
         train_cv_prediction["card_id"] = train_id["card_id"]
@@ -77,7 +84,7 @@ y_pred = train_cv[pred_col_name]
 rmse_score = evaluator.rmse(y_true, y_pred)
 logger.print("evaluator rmse score= " + str(rmse_score))
 
-print(train[pred_col_name].describe())
+print(train_y.describe())
 logger.print(train_cv.describe())
 logger.print(submission.describe())
 timer.time("done submission in ")
