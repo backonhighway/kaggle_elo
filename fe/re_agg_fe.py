@@ -51,7 +51,8 @@ class ReAggFe:
         # df["inst_pur2"] = (df["purchase_amount"]+1) * df["category_3"]
         df["no_city"] = np.where(df["city_id"] == -1, 1, 0)
         df["pa2"] = np.where(df["purchase_amount"] <= 0.8, 0.8, df["purchase_amount"])
-        df['month_diff'] = (datetime.datetime.today() - df['purchase_date']).dt.days // 30
+        today = datetime.datetime(2019, 1, 31, 7, 0)
+        df['month_diff'] = (today - df['purchase_date']).dt.days // 30
         df['month_diff'] += df['month_lag']
         df["pa2_month_diff"] = df["pa2"] * df["month_diff"]
         df["inst2"] = np.where(df["installments"] < 0, np.NaN, df["installments"])
@@ -69,14 +70,14 @@ class ReAggFe:
         aggs = {
             "city_id": ["nunique"],  # maybe the most frequent one?
             "category_1": ["mean"],
-            "installments": ["mean", "sum"],
+            "installments": ["mean", "sum"], # , "nunique"],
             "inst2": ["mean", "sum"],
             "big_pur": ["mean", "sum"],
             "category_3": ["mean"],
             "merchant_id": ["nunique"],
             "merchant_category_id": ["nunique"],  # maybe target encode or purchase encode?
             "month_lag": ["mean", "std", "max", "min", "skew", "nunique"],
-            "purchase_amount": ["max", "min", "mean", "std", "count", "sum"],  # "skew"],
+            "purchase_amount": ["max", "min", "mean", "std", "count", "sum"], # , "nunique"],  # "skew"],
             "category_2": ["nunique"],
             "state_id": ["nunique"],
             "subsector_id": ["nunique"],
@@ -95,7 +96,7 @@ class ReAggFe:
             "dow": ["nunique"],
             # "low_day_flag": ["sum", "mean"]
             "month_diff": ["mean", "std"],
-            "pa2_month_diff": ["mean", "min"]
+            "pa2_month_diff": ["mean", "min"],
         }
         if prefix == "old":
             aggs.update(old_aggs)
@@ -114,6 +115,10 @@ class ReAggFe:
         max_col = "_".join([prefix, "trans_elapsed_days", "max"])
         min_col = "_".join([prefix, "trans_elapsed_days", "min"])
         all_agg[month_ptp] = all_agg[max_col] - all_agg[min_col]
+
+        # if prefix == "old":
+        #     all_agg["old_same_buy_count"] =\
+        #         all_agg["old_purchase_amount_count"] - all_agg["old_purchase_amount_nunique"]
 
         return all_agg
 

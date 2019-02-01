@@ -33,4 +33,7 @@ class JitFe:
         df["old_to_last_day"] = (df["old_month_lag_max"] * -30) + (31 - df["old_last_day"])
         df["new_to_last_day"] = ((df["new_month_lag_max"] - 2) * -30) + (31 - df["new_last_day"])
 
+        if "pred_new" in df.columns:
+            df["pred_diff"] = df["pred_new"] - df["new_to_last_day"]
+
         return df

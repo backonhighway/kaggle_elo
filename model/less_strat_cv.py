@@ -67,11 +67,12 @@ drop_col = [
     "old_purchase_amount_skew",  # "old_purchase_amount_std",
     # "new_category_2_nunique", "old_category_2_nunique",
     # "old_null_merchant", "new_null_merchant",
-    # "old_ym_target_encode_mean", "new_ym_target_encode_mean",
-    # "old_hour_target_encode_mean", "new_hour_target_encode_mean",
+    "old_ym_target_encode_mean", "new_ym_target_encode_mean",
+    "old_hour_target_encode_mean", "new_hour_target_encode_mean",
     # "old_subsector_id_target_encode_mean",
     # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
-    "pred_new",
+    "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
+    "old_installments_nunique", "new_installments_nunique",
 ]
 train_x = drop_col_util.drop_col(train, drop_col)
 test_x = drop_col_util.drop_col(test, drop_col)

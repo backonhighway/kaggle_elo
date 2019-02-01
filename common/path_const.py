@@ -55,6 +55,10 @@ OLD_TRANS8 = os.path.join(INPUT_DIR, "old_trans8.csv")
 NEW_TRANS8 = os.path.join(INPUT_DIR, "new_trans8.csv")
 OLD_TRANS9 = os.path.join(INPUT_DIR, "old_trans9.csv")
 OLD_TRANS10 = os.path.join(INPUT_DIR, "old_trans10.csv")
+OLD_TRANS11 = os.path.join(INPUT_DIR, "old_trans11.csv")
+NEW_TRANS11 = os.path.join(INPUT_DIR, "new_trans11.csv")
+
+LDA_ALL1 = os.path.join(INPUT_DIR, "lda_all1.csv")
 
 NEW_DAY_PRED_SUB = os.path.join(SUB_DIR, "new_day_pred_sub.csv")
 NEW_DAY_PRED_OOF = os.path.join(SUB_DIR, "new_day_pred_oof.csv")
