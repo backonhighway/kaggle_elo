@@ -120,9 +120,14 @@ class GoldenLoader:
         ]
         for f in use_files:
             train, test = self.load_file_and_merge(train, test, f, csv_io)
+
         pred_train = csv_io.read_file(path_const.NEW_DAY_PRED_OOF)
         pred_test = csv_io.read_file(path_const.NEW_DAY_PRED_SUB)
         train = pd.merge(train, pred_train, on="card_id", how="left")
+        test = pd.merge(test, pred_test, on="card_id", how="left")
+
+        lda = csv_io.read_file(path_const.LDA_ALL1)
+        train = pd.merge(train, lda, on="card_id", how="left")
         test = pd.merge(test, pred_test, on="card_id", how="left")
 
         print(train.shape)
