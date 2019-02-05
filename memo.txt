@@ -28,3 +28,27 @@ lda the categories
 
 ratio of merchant counts
 
+historical_transactions_df = historical_transactions_df.sort_values(by=['card_id', 'purchase_date'])[['card_id', 'month_lag', 'purchase_amount']]
+card_ids = list(historical_transactions_df['card_id'].unique())
+out_dfs = [None] * len(card_ids)
+a = 0
+agg_func = {'purchase_amount': ['count','mean', 'sum', 'median', 'nunique'],}
+historical_transactions_df_by_month_lag = historical_transactions_df.groupby(['card_id', 'month_lag']).agg(agg_func)
+historical_transactions_df_by_month_lag.columns = ['_'.join(map(str,col)) for col in historical_transactions_df_by_month_lag.columns]
+regr = LinearRegression()
+col_names = ['card_id', 'coef', 'intercept']
+df = pd.DataFrame(columns=col_names)
+for card_id in card_ids:
+  x = list(historical_transactions_df_by_month_lag.loc[card_id].index)
+  y = list(historical_transactions_df_by_month_lag.loc[card_id]['purchase_amount_sum'])
+  x = [[x] for x in x]
+  y = [[x] for x in y]
+  reg = regr.fit(x, y)
+  coef = (reg.coef_[0][0])
+  intercept = (reg.intercept_[0])
+  out_dfs[a] = {'card_id': card_id, 'coef': coef, 'intercept': intercept}
+  a += 1
+for col in df.columns:
+  if col != 'card_id':
+    features.append(col)
+df_regression = pd.concat([pd.DataFrame([out_dfs[i]], columns=col_names) for i in range(len(list(filter(None, out_dfs))))],ignore_index=True)
