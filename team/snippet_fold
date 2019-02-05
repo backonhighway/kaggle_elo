@@ -1,0 +1,17 @@
+outliers = (train["target"] < -30).astype(int).values
+split_num = 5
+random_state = 4590
+
+skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=random_state)
+train_preds = []
+for idx, (train_index, test_index) in enumerate(skf.split(train, outliers)):
+    train_id = train.iloc[test_index]
+    train_cv_prediction = pd.DataFrame()
+    train_cv_prediction["card_id"] = train_id["card_id"]
+    train_cv_prediction["fold"] = idx
+    train_preds.append(train_cv_prediction)
+
+train_output = pd.concat(train_preds, axis=0)
+print(train_output.head())
+print(train_output.shape)
+train_output.to_csv("../output/folds.csv", index=False)

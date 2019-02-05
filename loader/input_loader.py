@@ -106,8 +106,12 @@ class GoldenLoader:
         timer = pocket_timer.GoldenTimer(logger)
         csv_io = pocket_file_io.GoldenCsv()
 
-        train = csv_io.read_file(path_const.TRAIN1)
-        test = csv_io.read_file(path_const.TEST1)
+        train = csv_io.read_file(path_const.ORG_TRAIN)
+        test = csv_io.read_file(path_const.ORG_TEST)
+        train_test_files = [
+            (path_const.TRAIN1, path_const.TEST1),
+            (path_const.NEW_DAY_PRED_OOF, path_const.NEW_DAY_PRED_SUB),
+        ]
         use_files = [
             path_const.RE_NEW_TRANS1,
             path_const.RE_OLD_TRANS1,
@@ -118,12 +122,10 @@ class GoldenLoader:
             path_const.NEW_TRANS11,
             path_const.OLD_TRANS11,
         ]
+        for f in train_test_files:
+            train, test = self.load_train_test_and_merge(train, test, f[0], f[1], csv_io)
         for f in use_files:
             train, test = self.load_file_and_merge(train, test, f, csv_io)
-        pred_train = csv_io.read_file(path_const.NEW_DAY_PRED_OOF)
-        pred_test = csv_io.read_file(path_const.NEW_DAY_PRED_SUB)
-        train = pd.merge(train, pred_train, on="card_id", how="left")
-        test = pd.merge(test, pred_test, on="card_id", how="left")
 
         print(train.shape)
         print(test.shape)
@@ -140,3 +142,14 @@ class GoldenLoader:
         train = pd.merge(train, new_file, on="card_id", how="left")
         test = pd.merge(test, new_file, on="card_id", how="left")
         return train, test
+
+    @staticmethod
+    def load_train_test_and_merge(org_train, org_test, path_train, path_test, csv_io):
+        new_train = csv_io.read_file(path_train)
+        new_test = csv_io.read_file(path_test)
+        train = pd.merge(org_train, new_train, on="card_id", how="left")
+        test = pd.merge(org_test, new_test, on="card_id", how="left")
+        return train, test
+
+
+
