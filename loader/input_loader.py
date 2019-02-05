@@ -84,6 +84,24 @@ class GoldenLoader:
 
         return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
+    def load_medium_with_team(self):
+        train, test = self.load_whole_input()
+        team_train, team_test = self._load_team_files()
+        use_col = self.medium_col.copy()
+        team_col = list(team_train.columns)
+        use_col = use_col + team_col
+        print(len(use_col))
+        use_col.remove("card_id")
+
+        train = pd.merge(train, team_train, on="card_id", how="left")
+        test = pd.merge(test, team_test, on="card_id", how="left")
+
+        train_y = train["target"]
+        train_x = train[use_col]
+        test_x = test[use_col]
+
+        return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
+
     def load_small_pred_new(self):
         train, test = self.load_whole_input(use_pred=False)
         pred_col = [c for c in self.small_col if "new" not in c]
@@ -177,5 +195,13 @@ class GoldenLoader:
         test = pd.merge(org_test, new_test, on="card_id", how="left")
         return train, test
 
-
+    @staticmethod
+    def _load_team_files():
+        train_mar = pd.read_pickle("../input/team/marcus_train.pkl")
+        test_mar = pd.read_pickle("../input/team/marcus_test.pkl")
+        train_ts = pd.read_pickle("../input/team/time-features-v3-selected_train.pkl")
+        test_ts = pd.read_pickle("../input/team/time-features-v3-selected_test.pkl")
+        train = pd.merge(train_mar, train_ts, on="card_id", how="left")
+        test = pd.merge(test_mar, test_ts, on="card_id", how="left")
+        return train, test
 
