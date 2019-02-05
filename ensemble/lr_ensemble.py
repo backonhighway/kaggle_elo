@@ -21,12 +21,16 @@ class GoldenLr:
         files = [
             ("with_pred", "big"),
             ("small", "small"),
-            ("mlp3", "mlp"),
+            # ("mlp3", "mlp"),
             # ("mlp_rank", "mlp_rank"),
+            ("bin", "bin"),
+            ("no_out", "no_out"),
         ]
 
         train, test = self.make_files(files)
         timer.time("load csv in ")
+        train["no_out"] = (1 - train["bin"]) * train["no_out"]
+        print(train.describe())
 
         self.print_corr(train, test, files)
         timer.time("corr check")
@@ -86,7 +90,7 @@ class GoldenLr:
         sub["card_id"] = test["card_id"]
         sub["target"] = y_pred
         print(train["target"].describe())
-        print(train["big"].describe())
+        # print(train["big"].describe())
         print(sub["target"].describe())
         sub.to_csv(path_const.OUTPUT_ENS, index=False)
 

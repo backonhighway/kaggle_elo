@@ -13,10 +13,23 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 csv_io = pocket_file_io.GoldenCsv()
 
-data = input_loader.GoldenLoader().load_small_input()
+train = pd.read_pickle("../output/pocket_train_small_feats.pkl")
+test = pd.read_pickle("../output/pocket_test_small_feats.pkl")
+print(train.columns)
+# train, test = input_loader.GoldenLoader().load_for_share()
+# train.to_pickle("../output/pocket_train_org_param.pkl")
+# test.to_pickle("../output/pocket_test_org_param.pkl")
+# train1 = pd.read_pickle("../output/pocket_train_small_feats.pkl")
+# test1 = pd.read_pickle("../output/pocket_test_org_param.pkl")
+# print(train.equals(train1))
+# print(test.equals(test1))
 timer.time("load csv")
 
-train, test, train_x, train_y, test_x = data
+train_x = train.drop(columns=["card_id", "target"])
+train_y = train["target"]
+test_x = test.drop(columns=["card_id"])
+train = train[["card_id", "target"]]
+test = test[["card_id"]]
 print(train_x.shape)
 print(train_y.shape)
 print(test_x.shape)

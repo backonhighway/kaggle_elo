@@ -25,7 +25,7 @@ class OofFe:
         return ts
 
     def _do_oof_fe(self, train, test, ts):
-        skf = model_selection.StratifiedKFold(n_splits=4, shuffle=True, random_state=0)
+        skf = model_selection.StratifiedKFold(n_splits=5, shuffle=True, random_state=4590)
         outliers = (train["target"] < -30).astype(int).values
         encoded_ts_list = []
         for train_index, oof_index in skf.split(train, outliers):

@@ -21,7 +21,6 @@ print(train_x.shape)
 print(train_y.shape)
 print(test_x.shape)
 
-
 submission = pd.DataFrame()
 submission["card_id"] = test["card_id"]
 submission["target"] = 0
@@ -31,10 +30,11 @@ train_cv["cv_pred"] = 0
 
 outliers = (train["target"] < -30).astype(int).values
 bagging_num = 1
-split_num = 4
+split_num = 5
+random_state = 4590
 for bagging_index in range(bagging_num):
-    skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
-    logger.print("random_state=" + str(99*bagging_index))
+    skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=random_state)
+    logger.print("random_state=" + str(random_state))
     lgb = pocket_lgb.GoldenLgb()
     total_score = 0
     models = []

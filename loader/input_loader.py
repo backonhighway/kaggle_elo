@@ -33,6 +33,26 @@ class GoldenLoader:
         ]
         self.medium_col = self.small_col + ["pred_diff"]
 
+        self.drop_col = [
+            "card_id", "target",  # "feature_1", "feature_2", "feature_3",
+            "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
+            "old_null_state", "new_null_state", "new_null_install",  # "old_null_install",
+            "old_cat3_pur_mean", "new_cat3_pur_mean", "old_cat2_pur_mean", "new_cat2_pur_mean",
+            "new_category_4_mean",  # "new_merchant_group_id_nunique", "old_merchant_group_id_nunique"
+            "new_mon_nunique_mean", "new_woy_nunique_mean",
+            # "new_month_lag_ptp", "new_month_lag_min",
+            "new_purchase_amount_skew",  # "new_purchase_amount_std",
+            "old_purchase_amount_skew",  # "old_purchase_amount_std",
+            # "new_category_2_nunique", "old_category_2_nunique",
+            # "old_null_merchant", "new_null_merchant",
+            # "old_ym_target_encode_mean", "new_ym_target_encode_mean",
+            # "old_hour_target_encode_mean", "new_hour_target_encode_mean",
+            # "old_subsector_id_target_encode_mean",
+            # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
+            "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
+            "old_installments_nunique", "new_installments_nunique", "pred_new"
+        ]
+
         self.logger = pocket_logger.get_my_logger()
         self.timer = pocket_timer.GoldenTimer(self.logger)
 
@@ -65,7 +85,7 @@ class GoldenLoader:
         return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
     def load_small_pred_new(self):
-        train, test = self.load_whole_input()
+        train, test = self.load_whole_input(use_pred=False)
         pred_col = [c for c in self.small_col if "new" not in c]
         train_x = train[pred_col]
         test_x = test[pred_col]
@@ -77,41 +97,47 @@ class GoldenLoader:
         train, test = self.load_whole_input()
 
         train_y = train["target"]
-        drop_col = [
-            "card_id", "target",  # "feature_1", "feature_2", "feature_3",
-            "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
-            "old_null_state", "new_null_state", "new_null_install",  # "old_null_install",
-            "old_cat3_pur_mean", "new_cat3_pur_mean", "old_cat2_pur_mean", "new_cat2_pur_mean",
-            "new_category_4_mean",  # "new_merchant_group_id_nunique", "old_merchant_group_id_nunique"
-            "new_mon_nunique_mean", "new_woy_nunique_mean",
-            # "new_month_lag_ptp", "new_month_lag_min",
-            "new_purchase_amount_skew",  # "new_purchase_amount_std",
-            "old_purchase_amount_skew",  # "old_purchase_amount_std",
-            # "new_category_2_nunique", "old_category_2_nunique",
-            # "old_null_merchant", "new_null_merchant",
-            # "old_ym_target_encode_mean", "new_ym_target_encode_mean",
-            # "old_hour_target_encode_mean", "new_hour_target_encode_mean",
-            # "old_subsector_id_target_encode_mean",
-            # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
-            "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
-            "old_installments_nunique", "new_installments_nunique",
-        ]
-        train_x = drop_col_util.drop_col(train, drop_col)
-        test_x = drop_col_util.drop_col(test, drop_col)
+        train_x = drop_col_util.drop_col(train, self.drop_col)
+        test_x = drop_col_util.drop_col(test, self.drop_col)
 
         return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
-    def load_whole_input(self):
+    def load_for_share(self):
+        train, test = self.load_whole_input()
+
+        drop_col = self.drop_col.copy()
+        drop_col.remove("card_id")
+        drop_col.remove("target")
+        train = drop_col_util.drop_col(train, drop_col)
+        test = drop_col_util.drop_col(test, drop_col)
+        return train, test
+
+    def load_small_for_share(self):
+        train, test = self.load_whole_input()
+
+        use_col = ["card_id"] + self.medium_col
+        test = test[use_col]
+        use_col = ["target"] + use_col
+        train = train[use_col]
+        self.timer.time("prepare train in ")
+
+        return train, test
+
+    def load_whole_input(self, use_pred=True):
         logger = pocket_logger.get_my_logger()
         timer = pocket_timer.GoldenTimer(logger)
         csv_io = pocket_file_io.GoldenCsv()
 
-        train = csv_io.read_file(path_const.ORG_TRAIN)
-        test = csv_io.read_file(path_const.ORG_TEST)
+        train = csv_io.read_file(path_const.ORG_TRAIN)[["card_id"]]
+        test = csv_io.read_file(path_const.ORG_TEST)[["card_id"]]
         train_test_files = [
             (path_const.TRAIN1, path_const.TEST1),
             (path_const.NEW_DAY_PRED_OOF, path_const.NEW_DAY_PRED_SUB),
         ]
+        if not use_pred:
+            train_test_files = [
+                (path_const.TRAIN1, path_const.TEST1),
+            ]
         use_files = [
             path_const.RE_NEW_TRANS1,
             path_const.RE_OLD_TRANS1,
