@@ -205,3 +205,9 @@ class GoldenLoader:
         test = pd.merge(test_mar, test_ts, on="card_id", how="left")
         return train, test
 
+    def get_large_col(self, whole_col):
+        ret_col = whole_col.copy()
+        for c in self.drop_col:
+            if c in ret_col:
+                ret_col.remove(c)
+        return ret_col

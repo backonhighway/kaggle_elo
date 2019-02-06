@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
 from elo.common import pocket_lgb, evaluator
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, BayesianRidge
 
 
 class GoldenLr:
@@ -19,17 +19,21 @@ class GoldenLr:
 
         # (file_name, col_name)
         files = [
-            ("with_pred", "big"),
-            ("small", "small"),
-            # ("mlp3", "mlp"),
+            ("org_param", "big"),
+            ("medium", "medium"),
+            ("mlp3", "mlp"),
             # ("mlp_rank", "mlp_rank"),
             ("bin", "bin"),
-            ("no_out", "no_out"),
+            ("no_out2", "no_out2"),
+            ("bin_large", "bin_large"),
+            ("no_out_large", "no_out_large"),
+            ("tune_param", "tune_param")
         ]
 
         train, test = self.make_files(files)
         timer.time("load csv in ")
-        train["no_out"] = (1 - train["bin"]) * train["no_out"]
+        train["no_out2"] = (1 - train["bin"]) * train["no_out2"]
+        train["no_out_large"] = (1 - train["bin_large"]) * train["no_out_large"]
         print(train.describe())
 
         self.print_corr(train, test, files)
@@ -78,7 +82,7 @@ class GoldenLr:
         print("------- do preds --------")
         ensemble_col = [f[1] for f in files]
         train_x = train[ensemble_col]
-        reg = LinearRegression().fit(train_x, train["target"])
+        reg = BayesianRidge().fit(train_x, train["target"])
         print(reg.coef_)
         y_pred = reg.predict(train_x)
         score = evaluator.rmse(train["target"], y_pred)

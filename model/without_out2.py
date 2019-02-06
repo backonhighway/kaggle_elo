@@ -13,11 +13,13 @@ logger = pocket_logger.get_my_logger()
 timer = pocket_timer.GoldenTimer(logger)
 csv_io = pocket_file_io.GoldenCsv()
 
-data = input_loader.GoldenLoader().load_large_input()
-timer.time("load csv")
-
-train, test, train_x, train_y, test_x = data
-train_y = (train_y < -30).astype(int)
+loader = input_loader.GoldenLoader()
+train, test = loader.load_whole_input()
+use_col = loader.medium_col
+test_x = test[use_col]
+print(train.shape)
+print(test.shape)
+timer.time("load csv in ")
 
 submission = pd.DataFrame()
 submission["card_id"] = test["card_id"]
@@ -33,26 +35,39 @@ random_state = 4590
 for bagging_index in range(bagging_num):
     skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=random_state)
     logger.print("random_state=" + str(random_state))
-    lgb = pocket_lgb.AdversarialLgb()
+    lgb = pocket_lgb.GoldenLgb()
     total_score = 0
     models = []
     train_preds = []
+    no_out_preds = []
     for train_index, test_index in skf.split(train, outliers):
-        X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
-        y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
+        _train, _test = train.iloc[train_index], train.iloc[test_index]
+
+        _outlier = _test[_test["target"] < -30]
+        outlier_x, outlier_y = _outlier[use_col], _outlier["target"]
+
+        _train, _test = _train[_train["target"] > -30], _test[_test["target"] > -30]
+        X_train, X_test = _train[use_col], _test[use_col]
+        y_train, y_test = _train["target"], _test["target"]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
-        score = model.best_score["valid_0"]["auc"]
+        score = model.best_score["valid_0"]["rmse"]
         total_score += score
         y_pred = model.predict(test_x)
         valid_set_pred = model.predict(X_test)
+        outlier_pred = model.predict(outlier_x)
         models.append(model)
 
         submission["target"] = submission["target"] + y_pred
-        train_id = train.iloc[test_index]
-        train_cv_prediction = pd.DataFrame()
-        train_cv_prediction["card_id"] = train_id["card_id"]
-        train_cv_prediction["cv_pred"] = valid_set_pred
+        train_non_out_pred = pd.DataFrame({
+            "card_id": _test["card_id"],
+            "cv_pred": valid_set_pred
+        })
+        train_out_pred = pd.DataFrame({
+            "card_id": _outlier["card_id"],
+            "cv_pred": outlier_pred
+        })
+        train_cv_prediction = pd.concat([train_non_out_pred, train_out_pred], axis=0)
         train_preds.append(train_cv_prediction)
         timer.time("done one set in")
 
@@ -71,7 +86,7 @@ submission.to_csv(path_const.OUTPUT_SUB, index=False)
 train_cv["cv_pred"] = train_cv["cv_pred"] / bagging_num
 train_cv.to_csv(path_const.OUTPUT_OOF, index=False)
 
-y_true = train_y
+y_true = train["target"]
 y_pred = train_cv["cv_pred"]
 rmse_score = evaluator.rmse(y_true, y_pred)
 logger.print("evaluator rmse score= " + str(rmse_score))

@@ -1,0 +1,90 @@
+import os, sys
+ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
+sys.path.append(ROOT)
+
+import pandas as pd
+import numpy as np
+from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
+from elo.common import pocket_lgb, evaluator
+from elo.loader import input_loader
+from sklearn import model_selection
+
+logger = pocket_logger.get_my_logger()
+timer = pocket_timer.GoldenTimer(logger)
+csv_io = pocket_file_io.GoldenCsv()
+
+loader = input_loader.GoldenLoader()
+train, test = loader.load_whole_input()
+use_col = loader.medium_col
+test_x = test[use_col]
+print(train.shape)
+print(test.shape)
+timer.time("load csv in ")
+
+submission = pd.DataFrame()
+submission["card_id"] = test["card_id"]
+submission["target"] = 0
+
+outliers = (train["target"] < -30).astype(int).values
+split_num = 5
+random_state = 4590
+
+skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=random_state)
+logger.print("random_state=" + str(random_state))
+lgb = pocket_lgb.GoldenLgb()
+total_score = 0
+models = []
+train_preds = []
+no_out_preds = []
+for train_index, test_index in skf.split(train, outliers):
+    _train, _test = train.iloc[train_index], train.iloc[test_index]
+
+    _outlier = _test[_test["target"] < -30]
+    outlier_x, outlier_y = _outlier[use_col], _outlier["target"]
+
+    _train, _test = _train[_train["target"] > -30], _test[_test["target"] > -30]
+    X_train, X_test = _train[use_col], _test[use_col]
+    y_train, y_test = _train["target"], _test["target"]
+
+    model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
+    score = model.best_score["valid_0"]["rmse"]
+    total_score += score
+    y_pred = model.predict(test_x)
+    valid_set_pred = model.predict(X_test)
+    outlier_pred = model.predict(outlier_x)
+    models.append(model)
+
+    submission["target"] = submission["target"] + y_pred
+    train_non_out_pred = pd.DataFrame({
+        "card_id": _test["card_id"],
+        "cv_pred": valid_set_pred
+    })
+    train_out_pred = pd.DataFrame({
+        "card_id": _outlier["card_id"],
+        "cv_pred": outlier_pred
+    })
+    train_cv_prediction = pd.concat([train_non_out_pred, train_out_pred], axis=0)
+    train_preds.append(train_cv_prediction)
+    timer.time("done one set in")
+
+lgb.show_feature_importance(models[0], path_const.FEATURE_GAIN)
+avg_score = str(total_score / split_num)
+logger.print("average score= " + avg_score)
+timer.time("end train in ")
+
+submission["target"] = submission["target"] / split_num
+submission.to_csv(path_const.OUTPUT_SUB, index=False)
+
+train_output = pd.concat(train_preds, axis=0)
+train_output.to_csv(path_const.OUTPUT_OOF, index=False)
+
+y_true = train["target"]
+y_pred = train_output["cv_pred"]
+rmse_score = evaluator.rmse(y_true, y_pred)
+logger.print("evaluator rmse score= " + str(rmse_score))
+
+print(train["target"].describe())
+logger.print(train_output.describe())
+logger.print(submission.describe())
+timer.time("done submission in ")
+

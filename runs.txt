@@ -112,11 +112,23 @@ average score= 1.5574589237954155
 33            old_pa2_month_diff_min               131            12306
 24           old_authorized_flag_sum               227             7852
 
+-----------------
 
-
-
-
-
+ensemble BayesianRidge
+CV score= 3.6293
+LB score= 3.675
+files = [
+    ("org_param", "big"),
+    ("medium", "medium"),
+    ("mlp3", "mlp"),
+    # ("mlp_rank", "mlp_rank"),
+    ("bin", "bin"),
+    ("no_out2", "no_out2"),
+    ("bin_large", "bin_large"),
+    ("no_out_large", "no_out_large"),
+    ("tune_param", "tune_param")
+]
+-----------------
 
 
 
