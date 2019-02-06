@@ -22,12 +22,16 @@ cleaner amount: min install as base, then sum the install
 drop duplicates keep first merchant, how many merchants each month?
 
 predict the count/last day of new from old
-
-
 lda the categories
-
 ratio of merchant counts
+----------------------------
+do target encoding divided by count
+do target encoding based on unique merchants
 
+
+
+
+----------------------------
 historical_transactions_df = historical_transactions_df.sort_values(by=['card_id', 'purchase_date'])[['card_id', 'month_lag', 'purchase_amount']]
 card_ids = list(historical_transactions_df['card_id'].unique())
 out_dfs = [None] * len(card_ids)

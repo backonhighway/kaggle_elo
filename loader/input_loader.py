@@ -50,7 +50,8 @@ class GoldenLoader:
             # "old_subsector_id_target_encode_mean",
             # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
             "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
-            "old_installments_nunique", "new_installments_nunique", "pred_new"
+            "old_installments_nunique", "new_installments_nunique", "pred_new",
+            "new_trans_elapsed_days_max", "new_trans_elapsed_days_min", "new_trans_elapsed_days_mean",  # +0.001
         ]
 
         self.logger = pocket_logger.get_my_logger()
@@ -102,12 +103,12 @@ class GoldenLoader:
 
         return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
-    def load_small_pred_new(self):
+    def load_small_pred_new(self, target_col="new_to_last_day"):
         train, test = self.load_whole_input(use_pred=False)
         pred_col = [c for c in self.small_col if "new" not in c]
         train_x = train[pred_col]
         test_x = test[pred_col]
-        train_y = train["new_to_last_day"]
+        train_y = train[target_col]
 
         return train[["card_id", "target"]], test[["card_id"]], train_x, train_y, test_x
 
@@ -151,6 +152,7 @@ class GoldenLoader:
         train_test_files = [
             (path_const.TRAIN1, path_const.TEST1),
             (path_const.NEW_DAY_PRED_OOF, path_const.NEW_DAY_PRED_SUB),
+            (path_const.NEW_PUR_MAX_PRED_OOF, path_const.NEW_PUR_MAX_PRED_SUB),
         ]
         if not use_pred:
             train_test_files = [

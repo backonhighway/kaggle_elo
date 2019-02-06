@@ -61,8 +61,11 @@ NEW_TRANS11 = os.path.join(INPUT_DIR, "new_trans11.csv")
 LDA_ALL1 = os.path.join(INPUT_DIR, "lda_all1.csv")
 LDA_ALL2 = os.path.join(INPUT_DIR, "lda_all2.csv")
 
-NEW_DAY_PRED_SUB = os.path.join(SUB_DIR, "new_day_pred_sub.csv")
-NEW_DAY_PRED_OOF = os.path.join(SUB_DIR, "new_day_pred_oof.csv")
+PRED_DIR = os.path.join(INPUT_DIR, "pred_feats")
+NEW_DAY_PRED_SUB = os.path.join(PRED_DIR, "new_day_pred_sub.csv")
+NEW_DAY_PRED_OOF = os.path.join(PRED_DIR, "new_day_pred_oof.csv")
+NEW_PUR_MAX_PRED_SUB = os.path.join(PRED_DIR, "new_pur_max_pred_sub.csv")
+NEW_PUR_MAX_PRED_OOF = os.path.join(PRED_DIR, "new_pur_max_pred_oof.csv")
 
 OUTPUT_SUB = os.path.join(SUB_DIR, "temp_sub.csv")
 OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
