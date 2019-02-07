@@ -50,7 +50,7 @@ class GoldenLoader:
             # "old_subsector_id_target_encode_mean",
             # "new_merchant_id_target_encode_mean", "old_merchant_id_target_encode_mean",
             "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
-            "old_installments_nunique", "new_installments_nunique", "pred_new",
+            "old_installments_nunique", "new_installments_nunique", # "pred_new_pur_max",
             "new_trans_elapsed_days_max", "new_trans_elapsed_days_min", "new_trans_elapsed_days_mean",  # +0.001
         ]
 
