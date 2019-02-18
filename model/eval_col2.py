@@ -21,10 +21,15 @@ timer.time("load csv in")
 train_y = train["target"]
 
 try_col = [
-    'new_one_pay_max', 'new_auth_one_pay_max', 'new_rec1_pa_sum',
-    'new_rec1_pa_max', 'new_rec1_auth_pa_sum', 'new_rec1_auth_pa_max',
-    'new_rec2_pa_sum', 'new_rec2_pa_max', 'new_rec2_auth_pa_sum',
-    'new_rec2_auth_pa_max'
+    "test"
+    # 'pred_from_new_ts_mean', 'pred_from_new_ts_max',
+    # 'pred_from_new_ts_min',
+    # 'pred_from_old_ts_mean', 'pred_from_old_ts_max',
+    # 'pred_from_old_ts_min',
+    # 'pred_from_new_ts2_mean', 'pred_from_new_ts2_max',
+    # 'pred_from_new_ts2_min',
+    # 'pred_from_old_ts2_mean', 'pred_from_old_ts2_max',
+    # 'pred_from_old_ts2_min'
 ]
 # try_col = [c for c in train.columns if c not in drop_col and c not in base_col]
 print(len(try_col))

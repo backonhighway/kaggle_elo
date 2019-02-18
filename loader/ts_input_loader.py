@@ -36,3 +36,18 @@ class GoldenLoader2:
 
     def get_pred_col(self, org_cols):
         return [c for c in org_cols if c not in self.drop_for_pred_col]
+
+    @staticmethod
+    def load_ts_input_old2():
+        csv_io = pocket_file_io.GoldenCsv()
+        train = csv_io.read_file(path_const.TS_OLD_TRAIN2)
+        test = csv_io.read_file(path_const.TS_OLD_TEST2)
+        return train, test
+
+    @staticmethod
+    def load_ts_input_new2():
+        csv_io = pocket_file_io.GoldenCsv()
+        train = csv_io.read_file(path_const.TS_NEW_TRAIN2)
+        test = csv_io.read_file(path_const.TS_NEW_TEST2)
+        return train, test
+

@@ -143,8 +143,6 @@ class GoldenLoader:
         return train, test
 
     def load_whole_input(self, use_pred=True):
-        logger = pocket_logger.get_my_logger()
-        timer = pocket_timer.GoldenTimer(logger)
         csv_io = pocket_file_io.GoldenCsv()
 
         train = csv_io.read_file(path_const.ORG_TRAIN)[["card_id"]]
@@ -167,8 +165,12 @@ class GoldenLoader:
             path_const.OLD_TRANS9,
             path_const.NEW_TRANS11,
             path_const.OLD_TRANS11,
-            path_const.OLD_TRANS13,
-            path_const.NEW_TRANS13,
+            # path_const.NEW_TRANS13,
+            # path_const.OLD_TRANS13,
+            path_const.FEAT_FROM_TS_NEW,
+            path_const.FEAT_FROM_TS_OLD,
+            path_const.FEAT_FROM_TS_NEW2,
+            path_const.FEAT_FROM_TS_OLD2,
         ]
         for f in train_test_files:
             train, test = self.load_train_test_and_merge(train, test, f[0], f[1], csv_io)

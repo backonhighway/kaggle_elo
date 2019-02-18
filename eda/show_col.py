@@ -19,6 +19,6 @@ def show_col(the_path):
     print("-" * 40)
 
 
-show_col(path_const.OLD_TRANS13)
-show_col(path_const.NEW_TRANS13)
+show_col(path_const.FEAT_FROM_TS_NEW2)
+show_col(path_const.FEAT_FROM_TS_OLD2)
 
