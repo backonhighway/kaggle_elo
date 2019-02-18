@@ -152,3 +152,41 @@ class ShallowLgb(GoldenLgb):
                           categorical_feature=self.category_col)
         print('End training...')
         return model
+
+
+class TsLgb(GoldenLgb):
+    def __init__(self, seed=99):
+        super().__init__()
+        self.train_param = {
+            'num_leaves': 31,
+            'min_data_in_leaf': 30,
+            'objective': 'regression',
+            'max_depth': -1,
+            'learning_rate': 0.05,
+            "boosting": "gbdt",
+            "feature_fraction": 0.9,
+            "metric": 'rmse',
+            "verbosity": -1,
+            "random_state": seed
+        }
+        self.target_col_name = "target"
+        self.category_col = [
+            # "state_id", "city_id"  # "category_3", "category_1", "category_2"
+        ]
+        self.drop_cols = [
+        ]
+
+    def do_train_direct(self, x_train, x_test, y_train, y_test):
+        lgb_train = lgb.Dataset(x_train, y_train)
+        lgb_eval = lgb.Dataset(x_test, y_test)
+
+        print('Start training...')
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=[lgb_eval],
+                          verbose_eval=100,
+                          num_boost_round=1000,
+                          early_stopping_rounds=100,
+                          categorical_feature=self.category_col)
+        print('End training...')
+        return model

@@ -71,6 +71,18 @@ NEW_DAY_PRED_OOF = os.path.join(PRED_DIR, "new_day_pred_oof.csv")
 NEW_PUR_MAX_PRED_SUB = os.path.join(PRED_DIR, "new_pur_max_pred_sub.csv")
 NEW_PUR_MAX_PRED_OOF = os.path.join(PRED_DIR, "new_pur_max_pred_oof.csv")
 
+# ts source
+TS_OLD_TRAIN = os.path.join(INPUT_DIR, "ts_old_train.csv")
+TS_OLD_TEST = os.path.join(INPUT_DIR, "ts_old_test.csv")
+TS_NEW_TRAIN = os.path.join(INPUT_DIR, "ts_new_train.csv")
+TS_NEW_TEST = os.path.join(INPUT_DIR, "ts_new_test.csv")
+NEW_TS_PRED_SUB = os.path.join(PRED_DIR, "new_ts_pred_sub.csv")
+NEW_TS_PRED_OOF = os.path.join(PRED_DIR, "new_ts_pred_oof.csv")
+OLD_TS_PRED_SUB = os.path.join(PRED_DIR, "old_ts_pred_sub.csv")
+OLD_TS_PRED_OOF = os.path.join(PRED_DIR, "old_ts_pred_oof.csv")
+FEAT_FROM_TS_OLD = os.path.join(INPUT_DIR, "feat_from_ts_old.csv")
+FEAT_FROM_TS_NEW = os.path.join(INPUT_DIR, "feat_from_ts_new.csv")
+
 OUTPUT_SUB = os.path.join(SUB_DIR, "temp_sub.csv")
 OUTPUT_OOF = os.path.join(SUB_DIR, "temp_oof.csv")
 OUTPUT_ENS = os.path.join(SUB_DIR, "temp_ens.csv")

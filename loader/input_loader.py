@@ -167,6 +167,8 @@ class GoldenLoader:
             path_const.OLD_TRANS9,
             path_const.NEW_TRANS11,
             path_const.OLD_TRANS11,
+            path_const.OLD_TRANS13,
+            path_const.NEW_TRANS13,
         ]
         for f in train_test_files:
             train, test = self.load_train_test_and_merge(train, test, f[0], f[1], csv_io)
@@ -175,7 +177,6 @@ class GoldenLoader:
 
         print(train.shape)
         print(test.shape)
-        timer.time("load csv in ")
 
         fer = jit_fe.JitFe()
         train = fer.do_fe(train)
