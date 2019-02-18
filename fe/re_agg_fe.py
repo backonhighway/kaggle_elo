@@ -191,6 +191,7 @@ class ReAggFe:
         aggs = {
             "installments": ["sum", ],
             "purchase_amount": ["count"],  # max is not bad
+            "merchant_id": ["nunique"],
         }
         rec_df = recent_df.groupby(["card_id"]).agg(aggs).reset_index()
         cols = ["_".join([name, k, agg]) for k in aggs.keys() for agg in aggs[k]]
