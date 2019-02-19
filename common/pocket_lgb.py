@@ -24,7 +24,6 @@ class GoldenLgb:
             'objective': 'regression',
             'max_depth': -1,
             'learning_rate': 0.01,
-            "min_child_samples": 20,
             "boosting": "gbdt",
             "feature_fraction": 0.9,
             "bagging_freq": 1,
@@ -33,7 +32,7 @@ class GoldenLgb:
             "metric": 'rmse',
             "lambda_l1": 0.1,
             "verbosity": -1,
-            "random_state": 4590
+            "random_state": 4590,
         }
         self.category_col = cat_col
         self.drop_cols = [
@@ -189,4 +188,23 @@ class TsLgb(GoldenLgb):
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')
+        return model
+
+
+class OptLgb(GoldenLgb):
+    def __init__(self, train_param):
+        super().__init__()
+        self.train_param = train_param
+
+    def do_train_direct(self, x_train, x_test, y_train, y_test):
+        lgb_train = lgb.Dataset(x_train, y_train)
+        lgb_eval = lgb.Dataset(x_test, y_test)
+
+        model = lgb.train(self.train_param,
+                          lgb_train,
+                          valid_sets=[lgb_eval],
+                          verbose_eval=1000,
+                          num_boost_round=3000,
+                          early_stopping_rounds=100,
+                          categorical_feature=self.category_col)
         return model

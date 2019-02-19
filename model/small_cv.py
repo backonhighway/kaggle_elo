@@ -21,7 +21,6 @@ print(train_x.shape)
 print(train_y.shape)
 print(test_x.shape)
 
-
 submission = pd.DataFrame()
 submission["card_id"] = test["card_id"]
 submission["target"] = 0
