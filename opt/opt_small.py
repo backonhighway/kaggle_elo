@@ -90,10 +90,10 @@ def get_cv_score(param):
 
 timer.time("start study")
 study = optuna.create_study()
-study.optimize(objective, n_trials=10)
-print(study.best_params)
-print(study.best_value)
-print(study.best_trial)
+study.optimize(objective, n_trials=100)
+logger.print(study.best_params)
+logger.print(study.best_value)
+logger.print(study.best_trial)
 timer.time("end study")
 
 

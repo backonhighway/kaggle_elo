@@ -82,10 +82,6 @@ def try_some(train, test):
     rmse_score = evaluator.rmse(y_true, y_pred)
     logger.print("evaluator rmse score= " + str(rmse_score))
 
-    zero = np.zeros(y_pred.shape)
-    rmse_score = evaluator.rmse(y_true, zero)
-    logger.print("evaluator rmse score= " + str(rmse_score))
-
     print(train["target"].describe())
     logger.print(train_cv.describe())
     logger.print(submission.describe())
