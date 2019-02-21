@@ -17,9 +17,9 @@ class GoldenMlp:
         self.batch_size = batch_size
         self.lr_scheduler = lr_scheduler
 
-    def build_model(self):
+    def build_model(self, feature_cnt):
         network = GoldenNetwork()
-        model = network.build_single_input()
+        model = network.build_single_input(feature_cnt)
         sgd = optimizers.SGD(lr=0.1)
         model.compile(loss="mean_squared_error", optimizer=sgd, metrics=['mse'])
         return model
@@ -33,7 +33,7 @@ class GoldenMlp:
             path_const.get_weight_file(str(fold)),
             monitor='val_loss', mode='min', save_best_only=True, verbose=0
         )
-        es = EarlyStopping(monitor="val_loss", patience=30, verbose=1)
+        es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
         callbacks = [check_point, es]
         if self.lr_scheduler is not None:
             callbacks.append(self.lr_scheduler)
@@ -69,15 +69,14 @@ class GoldenNetwork:
             "most_recent_purchases_range": (5, 3)
         }
 
-
     @staticmethod
-    def build_single_input(verbose=False):
-        meta_features = 33
+    def build_single_input(feature_cnt=218, verbose=False):
+        meta_features = feature_cnt
         mi = Input(shape=(meta_features,))
         m = Dense(512)(mi)
         m = PReLU()(m)
         m = BatchNormalization()(m)
-        m = Dropout(0.20)(m)
+        m = Dropout(0.50)(m)
         m = Dense(256)(m)
         m = PReLU()(m)
         m = BatchNormalization()(m)

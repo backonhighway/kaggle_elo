@@ -56,3 +56,26 @@ def rank_gauss(df, scale_col, verbose=False):
     #     df[col] = df[col].map(f)
 
 
+def prep_category(df, cat_col):
+    dummies = pd.get_dummies(df[cat_col])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

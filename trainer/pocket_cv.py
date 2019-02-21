@@ -28,15 +28,14 @@ class GoldenTrainer:
         bagging_num = 1
         split_num = 5
         for bagging_index in range(bagging_num):
-            skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=99 * bagging_index)
-            self.logger.print("random_state=" + str(99*bagging_index))
+            skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=4590)
 
             total_score = 0
             train_preds = []
             for idx, (train_index, test_index) in enumerate(skf.split(train, outliers)):
-                lr_schedule = learning_rate.GoldenLearningRate(0.1, 10).cosine_annealing_scheduler()
+                lr_schedule = learning_rate.GoldenLearningRate(0.1, 20).cosine_annealing_scheduler()
                 mlp = pocket_network.GoldenMlp(self.epochs, self.batch_size, lr_schedule)
-                network = mlp.build_model()
+                network = mlp.build_model(train_x.shape[1])
                 X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
                 y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 

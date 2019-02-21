@@ -82,6 +82,8 @@ class GoldenLoader:
             'new_hist_purchase_amount_max', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy',
             'new_hist_month_lag_mean', 'hist_purchase_amount_max', 'month_amount_skew', 'new_no_city_count'
         ]
+        dup_col.append("outliers")
+        dup_col_safe.append("outliers")
         train = train.drop(columns=dup_col_safe)
         test = test.drop(columns=dup_col_safe)
         return train, test
@@ -249,12 +251,16 @@ class GoldenLoader:
     @staticmethod
     def get_team_cat_col():
         return [
-            'new_merchant_id_most', 'city_id_fourth_most', 'city_id_second_most', 'city_id_third_most',
-            'merchant_id_fourth_most', 'merchant_id_most', 'merchant_id_second_most', 'merchant_id_third_most',
-            'state_id_fourth_most', 'state_id_most', 'state_id_second_most', 'state_id_third_most',
-            'subsector_id_most', 'subsector_id_second_most', 'subsector_id_third_most', 'subsector_id_fourth_most',
-            'category_1_most', 'category_1_second_most', 'category_2_most',
-            'category_2_second_most', 'category_2_third_most', 'category_2_fourth_most', 'category_2_fifth_most',
-            'category_3_most', 'category_3_second_most', 'category_3_third_most',
-            'first_active_month'
+            'city_id_fourth_most', 'merchant_id_most', 'subsector_id_most',
+            'subsector_id_second_most', 'subsector_id_fourth_most'
         ]
+        # return [
+        #     'new_merchant_id_most', 'city_id_fourth_most', 'city_id_second_most', 'city_id_third_most',
+        #     'merchant_id_fourth_most', 'merchant_id_most', 'merchant_id_second_most', 'merchant_id_third_most',
+        #     'state_id_fourth_most', 'state_id_most', 'state_id_second_most', 'state_id_third_most',
+        #     'subsector_id_most', 'subsector_id_second_most', 'subsector_id_third_most', 'subsector_id_fourth_most',
+        #     'category_1_most', 'category_1_second_most', 'category_2_most',
+        #     'category_2_second_most', 'category_2_third_most', 'category_2_fourth_most', 'category_2_fifth_most',
+        #     'category_3_most', 'category_3_second_most', 'category_3_third_most',
+        #     'first_active_month'
+        # ]
