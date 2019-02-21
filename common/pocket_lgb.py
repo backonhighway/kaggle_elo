@@ -7,33 +7,7 @@ from elo.common import pred_cols
 
 class GoldenLgb:
     def __init__(self, seed=99, cat_col=pred_cols.CAT_COLS):
-        # self.train_param = {
-        #     'learning_rate': 0.02,
-        #     'num_leaves': 31,
-        #     'boosting': 'gbdt',
-        #     'application': 'regression',
-        #     'metric': 'rmse',
-        #     'feature_fraction': .7,
-        #     #"max_bin": 511,
-        #     'seed': seed,
-        #     'verbose': 0,
-        # }
-        self.train_param = {
-            'num_leaves': 31,
-            'min_data_in_leaf': 30,
-            'objective': 'regression',
-            'max_depth': -1,
-            'learning_rate': 0.01,
-            "boosting": "gbdt",
-            "feature_fraction": 0.9,
-            "bagging_freq": 1,
-            "bagging_fraction": 0.9,
-            "bagging_seed": 11,
-            "metric": 'rmse',
-            "lambda_l1": 0.1,
-            "verbosity": -1,
-            "random_state": 4590,
-        }
+        self.train_param = self.kernel_train_param()
         self.category_col = cat_col
         self.drop_cols = [
         ]
@@ -81,6 +55,58 @@ class GoldenLgb:
             empty = pd.DataFrame()
             empty.to_csv(filename, index=False, mode="a")
             fi.to_csv(filename, index=False, mode="a")
+
+    @staticmethod
+    def kernel_train_param():
+        return {
+            'num_leaves': 31,
+            'min_data_in_leaf': 30,
+            'objective': 'regression',
+            'max_depth': -1,
+            'learning_rate': 0.01,
+            "boosting": "gbdt",
+            "feature_fraction": 0.9,
+            "bagging_freq": 1,
+            "bagging_fraction": 0.9,
+            "bagging_seed": 11,
+            "metric": 'rmse',
+            "lambda_l1": 0.1,
+            "verbosity": -1,
+            "random_state": 4590,
+        }
+
+    @staticmethod
+    def optuna_train_param():
+        return {
+            'num_leaves': 63,
+            'min_data_in_leaf': 89,
+            'objective': 'regression',
+            'max_depth': -1,
+            'learning_rate': 0.01,
+            "boosting": "gbdt",
+            "feature_fraction": 0.55,
+            # "bagging_freq": 1,
+            # "bagging_fraction": 0.9,
+            # "bagging_seed": 11,
+            "metric": 'rmse',
+            "lambda_l2": 0.1,
+            "verbosity": -1,
+            "random_state": 4590,
+        }
+
+    @staticmethod
+    def fast_train_param(seed):
+        return {
+            'learning_rate': 0.02,
+            'num_leaves': 31,
+            'boosting': 'gbdt',
+            'application': 'regression',
+            'metric': 'rmse',
+            'feature_fraction': .7,
+            #"max_bin": 511,
+            'seed': seed,
+            'verbose': 0,
+        }
 
 
 class AdversarialLgb(GoldenLgb):

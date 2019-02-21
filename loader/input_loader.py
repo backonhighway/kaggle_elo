@@ -57,6 +57,35 @@ class GoldenLoader:
         self.logger = pocket_logger.get_my_logger()
         self.timer = pocket_timer.GoldenTimer(self.logger)
 
+    @staticmethod
+    def load_team_input_v63():
+        train = pd.read_pickle("../input/df_train_v63.pkl")
+        test = pd.read_pickle("../input/df_test_v63.pkl")
+        dup_col = [
+            'first_mer_old_trans_elapsed_days_max', 'old_purchase_amount_sum', 'pa_range', 'pa_max',
+            'new_hist_purchase_amount_min', 'old_pa2_mean', 'new_hist_purchase_date_uptonow',
+            'hist_purchase_date_uptonow', 'hist_purchase_amount_mean', 'hist_merchant_id_nunique',
+            'hist_purchase_amount_sum', 'new_month_lag_nunique', 'old_no_city_count',
+            'kh_hist_kh__purchase_active_secs_diff_std', 'new_hist_purchase_amount_mean', 'old_pa2_sum',
+            'new_category_1_mean', 'hist_month_nunique', 'proper_old_purchase_amount_sum', 'hist_month_lag_mean',
+            'kh_hist_kh__purchase_active_secs_diff_max', 'hist_weekofyear_nunique', 'old_not_auth_purchase_amount_max',
+            'old_purchase_amount_max', 'new_hist_merchant_category_id_nunique', 'new_hist_purchase_amount_max',
+            'pa_mean', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy', 'new_hist_month_lag_mean',
+            'hist_purchase_amount_max', 'month_amount_skew', 'old_pa2_month_diff_mean', 'new_no_city_count',
+        ]
+        dup_col_safe = [
+            'old_purchase_amount_sum', 'pa_max', 'new_hist_purchase_amount_min', 'old_pa2_mean',
+            'hist_purchase_amount_mean', 'hist_purchase_amount_sum', 'new_month_lag_nunique', 'old_no_city_count',
+            'kh_hist_kh__purchase_active_secs_diff_std', 'new_hist_purchase_amount_mean', 'new_category_1_mean',
+            'hist_month_nunique', 'hist_month_lag_mean', 'kh_hist_kh__purchase_active_secs_diff_max',
+            'hist_weekofyear_nunique', 'old_not_auth_purchase_amount_max', 'new_hist_merchant_category_id_nunique',
+            'new_hist_purchase_amount_max', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy',
+            'new_hist_month_lag_mean', 'hist_purchase_amount_max', 'month_amount_skew', 'new_no_city_count'
+        ]
+        train = train.drop(columns=dup_col_safe)
+        test = test.drop(columns=dup_col_safe)
+        return train, test
+
     def load_small_input(self):
         train, test = self.load_whole_input()
         train_y = train["target"]
@@ -167,10 +196,10 @@ class GoldenLoader:
             path_const.OLD_TRANS11,
             # path_const.NEW_TRANS13,
             # path_const.OLD_TRANS13,
-            path_const.FEAT_FROM_TS_NEW,
-            path_const.FEAT_FROM_TS_OLD,
-            path_const.FEAT_FROM_TS_NEW2,
-            path_const.FEAT_FROM_TS_OLD2,
+            # path_const.FEAT_FROM_TS_NEW,
+            # path_const.FEAT_FROM_TS_OLD,
+            # path_const.FEAT_FROM_TS_NEW2,
+            # path_const.FEAT_FROM_TS_OLD2,
         ]
         for f in train_test_files:
             train, test = self.load_train_test_and_merge(train, test, f[0], f[1], csv_io)
@@ -216,3 +245,16 @@ class GoldenLoader:
             if c in ret_col:
                 ret_col.remove(c)
         return ret_col
+
+    @staticmethod
+    def get_team_cat_col():
+        return [
+            'new_merchant_id_most', 'city_id_fourth_most', 'city_id_second_most', 'city_id_third_most',
+            'merchant_id_fourth_most', 'merchant_id_most', 'merchant_id_second_most', 'merchant_id_third_most',
+            'state_id_fourth_most', 'state_id_most', 'state_id_second_most', 'state_id_third_most',
+            'subsector_id_most', 'subsector_id_second_most', 'subsector_id_third_most', 'subsector_id_fourth_most',
+            'category_1_most', 'category_1_second_most', 'category_2_most',
+            'category_2_second_most', 'category_2_third_most', 'category_2_fourth_most', 'category_2_fifth_most',
+            'category_3_most', 'category_3_second_most', 'category_3_third_most',
+            'first_active_month'
+        ]

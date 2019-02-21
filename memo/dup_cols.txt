@@ -1,0 +1,43 @@
+1) The duplicated columns I will drop are the following:
+dup_cols = [
+    'first_mer_old_trans_elapsed_days_max', 'old_purchase_amount_sum', 'pa_range', 'pa_max',
+    'new_hist_purchase_amount_min', 'old_pa2_mean', 'new_hist_purchase_date_uptonow', 'hist_purchase_date_uptonow',
+    'hist_purchase_amount_mean', 'hist_merchant_id_nunique', 'hist_purchase_amount_sum', 'new_month_lag_nunique',
+    'old_no_city_count', 'kh_hist_kh__purchase_active_secs_diff_std', 'new_hist_purchase_amount_mean', 'old_pa2_sum',
+    'new_category_1_mean', 'hist_month_nunique', 'proper_old_purchase_amount_sum', 'hist_month_lag_mean',
+    'kh_hist_kh__purchase_active_secs_diff_max', 'hist_weekofyear_nunique', 'old_not_auth_purchase_amount_max',
+    'old_purchase_amount_max', 'new_hist_merchant_category_id_nunique', 'new_hist_purchase_amount_max', 'pa_mean',
+    'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy', 'new_hist_month_lag_mean', 'hist_purchase_amount_max',
+    'month_amount_skew', 'old_pa2_month_diff_mean', 'new_no_city_count',
+]
+
+2) The sum should be larger than max, but it is reversed
+       hist_purchase_amount_max  hist_purchase_amount_sum  \
+count              2.019170e+05              2.019170e+05
+mean               6.667166e+01              1.442567e+01
+std                1.344855e+04              1.344916e+04
+min               -7.453150e-01             -2.088013e+03
+25%               -3.472026e-01             -6.584727e+01
+50%                1.235480e-01             -3.038694e+01
+75%                1.277163e+00             -1.246938e+01
+max                6.010604e+06              6.010596e+06
+
+
+The code for 1) is as follows
+
+the_cols = set()
+for c1 in feats:
+    print(c1)
+    for c2 in feats:
+        if c1== c2:
+            continue
+        score = train[c1].corr(train[c2])
+        if score > 0.9999:
+            l = [c1, c2]
+            l.sort()
+            tup = tuple(l)
+            the_cols.add(tup)
+print(the_cols)
+
+dup_cols = set([c[0] for c in the_cols])
+print(dup_cols)
