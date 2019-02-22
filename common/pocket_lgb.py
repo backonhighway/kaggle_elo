@@ -148,13 +148,13 @@ class ShallowLgb(GoldenLgb):
         super().__init__()
         self.train_param = {
             'learning_rate': 0.02,
-            'num_leaves': 4,
-            "max_depth": 2,
+            'num_leaves': 5,
+            "max_depth": -1,
             'boosting': 'gbdt',
             'application': 'regression',
             'metric': 'rmse',
             'feature_fraction': .9,
-            #"max_bin": 511,
+            "max_bin": 10,
             'seed': seed,
             'verbose': 0,
         }

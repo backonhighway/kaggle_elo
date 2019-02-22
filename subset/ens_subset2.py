@@ -6,8 +6,8 @@ import pandas as pd
 import numpy as np
 from elo.common import pocket_timer, pocket_logger, pocket_file_io, path_const
 from elo.common import pocket_lgb, evaluator
-from sklearn.linear_model import LinearRegression, BayesianRidge, Ridge
 from sklearn import model_selection
+from elo.loader import input_loader
 
 
 class GoldenLr:
@@ -24,11 +24,6 @@ class GoldenLr:
             45, 52, 54, 55, 56, 58, 59, 61, 65, 67, 69, 71,
             72, 74, 75, 76, 77, 78, 81, 83, 84, 88, 90, 91, 97, 98
         ]
-        pos_sig_idx = [
-            9, 12, 19, 24, 33, 36, 45, 52, 54, 55, 58, 59, 65, 67,
-            69, 72, 74, 75, 77, 78, 83, 88, 91, 97
-        ]
-        sig2_idx = [12, 24, 36, 58, 65, 67, 69, 72, 75, 91, 97]
         # files = ["subset_exp_" + str(idx) for idx in range(100)]
         files = ["subset_exp_" + str(idx) for idx in sig_idx]
         files = [(f, f) for f in files]
@@ -44,10 +39,13 @@ class GoldenLr:
         self.do_cv_pred(train, test, files)
 
     def make_files(self, files):
-        train = self.csv_io.read_file(path_const.ORG_TRAIN)
-        train = train[["card_id", "target"]]
-        test = self.csv_io.read_file(path_const.ORG_TEST)
-        test = test[["card_id"]]
+        train, test = input_loader.GoldenLoader.load_team_input_v63()
+        # train = self.csv_io.read_file(path_const.ORG_TRAIN)
+        train = train[["card_id", "target", "new_purchase_amount_count"]]
+        train["has_new"] = np.where(train["new_purchase_amount_count"] >= 1, 1, 0)
+        # test = self.csv_io.read_file(path_const.ORG_TEST)
+        test = test[["card_id", "new_purchase_amount_count"]]
+        test["has_new"] = np.where(test["new_purchase_amount_count"] >= 1, 1, 0)
 
         for f in files:
             train, test = self.add_file(f[0], f[1], train, test)
@@ -80,35 +78,9 @@ class GoldenLr:
             print(score)
 
     @staticmethod
-    def do_preds(train, test, files):
-        print("------- do preds --------")
-        ensemble_col = [f[1] for f in files]
-        train_x = train[ensemble_col]
-        reg = Ridge().fit(train_x, train["target"])
-        print(reg.coef_)
-        sig_idx = list()
-        for idx, coef in enumerate(reg.coef_):
-            if coef > 0.15:
-                sig_idx.append(idx)
-        print(sig_idx)
-        y_pred = reg.predict(train_x)
-        score = evaluator.rmse(train["target"], y_pred)
-        print(score)
-
-        test_x = test[ensemble_col]
-        y_pred = reg.predict(test_x)
-        sub = pd.DataFrame()
-        sub["card_id"] = test["card_id"]
-        sub["target"] = y_pred
-        print(train["target"].describe())
-        # print(train["big"].describe())
-        print(sub["target"].describe())
-        sub.to_csv(path_const.OUTPUT_ENS, index=False)
-
-    @staticmethod
     def do_cv_pred(train, test, files):
         print("------- do preds --------")
-        ensemble_col = [f[1] for f in files]
+        ensemble_col = [f[1] for f in files] + ["has_new"]
         train_x = train[ensemble_col]
         test_x = test[ensemble_col]
         train_y = train["target"]
@@ -121,23 +93,26 @@ class GoldenLr:
         split_num = 5
         skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=4590)
         train_preds = []
+        lgb = pocket_lgb.ShallowLgb()
         for idx, (train_index, test_index) in enumerate(skf.split(train, outliers)):
             X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
             y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
-            reg = BayesianRidge().fit(X_train, y_train)
-            print(reg.coef_)
-            valid_set_pred = reg.predict(X_test)
+            model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
+            valid_set_pred = model.predict(X_test)
             score = evaluator.rmse(y_test, valid_set_pred)
             print(score)
 
-            y_pred = reg.predict(test_x)
+            y_pred = model.predict(test_x)
             submission["target"] = submission["target"] + y_pred
             train_id = train.iloc[test_index]
             train_cv_prediction = pd.DataFrame()
             train_cv_prediction["card_id"] = train_id["card_id"]
             train_cv_prediction["cv_pred"] = valid_set_pred
             train_preds.append(train_cv_prediction)
+
+            if idx == 0:
+                lgb.show_feature_importance(model)
 
         train_output = pd.concat(train_preds, axis=0)
 
