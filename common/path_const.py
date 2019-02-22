@@ -111,6 +111,18 @@ def get_history_file(suffix):
     return os.path.join(OUTPUT_DIR, filename)
 
 
+# Feature subset
+EXP_DIR = os.path.join(OUTPUT_DIR, "subset_exp")
+EXP_LOG = os.path.join(EXP_DIR, "exp_log.csv")
 
+
+def get_subset_exp_oof(idx):
+    filename = "subset_exp_" + str(idx) + "_oof.csv"
+    return os.path.join(EXP_DIR, filename)
+
+
+def get_subset_exp_sub(idx):
+    filename = "subset_exp_" + str(idx) + "_sub.csv"
+    return os.path.join(EXP_DIR, filename)
 
 

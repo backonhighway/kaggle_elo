@@ -54,6 +54,13 @@ class GoldenLoader:
             "new_trans_elapsed_days_max", "new_trans_elapsed_days_min", "new_trans_elapsed_days_mean",  # +0.001
         ]
 
+        self.team_small_col = [
+            "first_mer_old_woy_nunique", "kh_hist_kh__purchase_date_seconds_diff_std",
+            "merchant_id_most", "new_category_3_mean", "old_time_diff_std", "old_hour_0_count",
+            "old_time_diff_min", "authorized_flag_y_ratio", "hist_merchant_id_nunique",
+            "kh_ratio_kh__purchase_days_diff_min", "new_subsector_id_nunique",
+        ]
+
         self.logger = pocket_logger.get_my_logger()
         self.timer = pocket_timer.GoldenTimer(self.logger)
 
@@ -76,7 +83,7 @@ class GoldenLoader:
         dup_col_safe = [
             'old_purchase_amount_sum', 'pa_max', 'new_hist_purchase_amount_min', 'old_pa2_mean',
             'hist_purchase_amount_mean', 'hist_purchase_amount_sum', 'new_month_lag_nunique', 'old_no_city_count',
-            'kh_hist_kh__purchase_active_secs_diff_std', 'new_hist_purchase_amount_mean', 'new_category_1_mean',
+            'kh_hist_kh__purchase_active_secs_diff_std', 'new_hist_purchase_amount_mean',  # 'new_category_1_mean',
             'hist_month_nunique', 'hist_month_lag_mean', 'kh_hist_kh__purchase_active_secs_diff_max',
             'hist_weekofyear_nunique', 'old_not_auth_purchase_amount_max', 'new_hist_merchant_category_id_nunique',
             'new_hist_purchase_amount_max', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy',
