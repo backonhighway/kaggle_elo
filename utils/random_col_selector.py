@@ -19,7 +19,7 @@ class RandomColumnSelector:
     @staticmethod
     def _get_use_cols(prob_list, col_list):
         use_prob = random.choice(prob_list)
-        use_col_samples = round(len(col_list) / use_prob)
+        use_col_samples = round(len(col_list) * use_prob)
         use_col = random.sample(col_list, use_col_samples)
         return use_col, use_prob
 

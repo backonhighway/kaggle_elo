@@ -18,7 +18,7 @@ loader = input_loader.GoldenLoader()
 train, test = loader.load_team_input_v63()
 timer.time("load csv in")
 
-base_col = loader.small_col
+base_col = loader.small_col + loader.team_small_col
 drop_col = [
     "card_id", "target",  # "feature_1", "feature_2", "feature_3",
     "old_weekend_mean", "new_weekend_mean", "new_authorized_flag_mean",
@@ -32,16 +32,18 @@ drop_col = [
     "pred_new", "old_same_buy_count", "old_purchase_amount_nunique", "new_purchase_amount_nunique",
     "old_installments_nunique", "new_installments_nunique",  # "pred_new_pur_max",
 ]
-try_col = [c for c in train.columns if c not in drop_col and c not in base_col and c not in base_col]
+try_col = [c for c in train.columns if c not in drop_col and c not in base_col]
+base_col_prob = [1.0, 0.9, 0.7, 0.5]
+try_col_prob = [0.1, 0.3, 0.5, 0.7]
 
 train_y = train["target"]
 outliers = (train["target"] < -30).astype(int).values
 split_num = 5
 skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=4590)
 lgb = pocket_lgb.GoldenLgb()
-col_selector = random_col_selector.RandomColumnSelector(base_col, try_col, [1.0], [0.1])
+col_selector = random_col_selector.RandomColumnSelector(base_col, try_col, base_col_prob, try_col_prob)
 exp_log_list = list()
-for i in range(2):
+for i in range(100):
     exp_log = dict()
     exp_log["exp_idx"] = i
 
