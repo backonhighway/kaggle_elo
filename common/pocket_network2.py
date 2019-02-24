@@ -33,7 +33,7 @@ class GoldenMlp2:
             path_const.get_weight_file(str(fold)),
             monitor='val_loss', mode='min', save_best_only=True, verbose=0
         )
-        es = EarlyStopping(monitor="val_loss", patience=10, verbose=1)
+        es = EarlyStopping(monitor="val_loss", patience=20, verbose=1)
         callbacks = [check_point, es]
         if self.lr_scheduler is not None:
             callbacks.append(self.lr_scheduler)
@@ -59,7 +59,11 @@ class GoldenNetwork:
     def build_single_input(feature_cnt=5, verbose=False):
         meta_features = feature_cnt
         mi = Input(shape=(meta_features,))
-        m = Dense(32)(mi)
+        m = Dense(64)(mi)
+        m = PReLU()(m)
+        m = BatchNormalization()(m)
+        m = Dropout(0.2)(m)
+        m = Dense(32)(m)
         m = PReLU()(m)
         m = BatchNormalization()(m)
         m = Dropout(0.05)(m)

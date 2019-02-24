@@ -33,7 +33,7 @@ class GoldenTrainer:
             total_score = 0
             train_preds = []
             for idx, (train_index, test_index) in enumerate(skf.split(train, outliers)):
-                lr_schedule = learning_rate.GoldenLearningRate(0.1, 20).cosine_annealing_scheduler()
+                lr_schedule = learning_rate.GoldenLearningRate(0.1, 50).cosine_annealing_scheduler()
                 mlp = pocket_network2.GoldenMlp2(self.epochs, self.batch_size, lr_schedule)
                 network = mlp.build_model(train_x.shape[1])
                 X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]

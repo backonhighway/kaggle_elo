@@ -23,6 +23,20 @@ class GoldenLr:
             ("team_v63", "lgb"),
             ("big_mlp", "mlp"),
         ]
+        team_files = [
+            'select_v44_ridge',
+            'tune_stack_57_v1',
+            'select_v51_ridge',
+            # 'tune_stack_57_2_v1',
+            'tune_stack_cgb_v1',
+            # 'elo_rnd_feat_bridge',
+
+            'outlier_lgb_v3_kh_time_feature2_pocket',
+            # 'delete_outlier_kh_pocket_stack_correct_ridge',
+            # 'outlier_lgb_pocket_logistic',
+            'delete_outlier_kh_pocket_stack_correct2_ridge'
+        ]
+        files = files + [(t, t) for t in team_files]
 
         train, test = self.make_files(files)
         timer.time("load csv in ")

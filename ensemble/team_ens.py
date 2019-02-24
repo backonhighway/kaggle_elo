@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 sys.path.append(ROOT)
@@ -27,7 +28,24 @@ class GoldenLr:
             ("small_team", "small")
         ]
 
+        team_files = [
+            'select_v44_ridge',
+            'tune_stack_57_v1',
+            'select_v51_ridge',
+            # 'tune_stack_57_2_v1',
+            'tune_stack_cgb_v1',
+            # 'elo_rnd_feat_bridge',
+
+            'outlier_lgb_v3_kh_time_feature2_pocket',
+            # 'delete_outlier_kh_pocket_stack_correct_ridge',
+            # 'outlier_lgb_pocket_logistic',
+            'delete_outlier_kh_pocket_stack_correct2_ridge'
+        ]
+        team_files = [(t, t) for t in team_files]
+
         train, test = self.make_files(files)
+        for f in team_files:
+            train, test = self.add_team_file(f[0], f[1], train, test)
         timer.time("load csv in ")
         print(train.describe())
 
@@ -57,6 +75,16 @@ class GoldenLr:
         ret_train = pd.merge(org_train, another_train, on="card_id", how="inner")
         ret_test = pd.merge(org_test, another_test, on="card_id", how="inner")
         return ret_train, ret_test
+
+    def add_team_file(self, file_name, col_name, org_train, org_test):
+        train_file_name = "../sub/" + file_name + "_oof_train"
+        test_file_name = "../sub/" + file_name + "_oof_test"
+        another_train = pd.read_pickle(train_file_name)
+        another_test = pd.read_pickle(test_file_name)
+        org_train[col_name] = another_train
+        org_test[col_name] = another_test
+        return org_train, org_test
+
 
     @staticmethod
     def print_corr(train, test, files):

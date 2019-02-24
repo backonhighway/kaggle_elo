@@ -111,7 +111,7 @@ class GoldenLr:
         test_x = pocket_scaler.rank_gauss(test_x, scale_col).fillna(0)
         data = (train, test, train_x, train_y, test_x)
 
-        trainer = pocket_cv2.GoldenTrainer(epochs=20, batch_size=512)
+        trainer = pocket_cv2.GoldenTrainer(epochs=100, batch_size=512)
         trainer.do_cv(data)
 
 
