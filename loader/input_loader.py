@@ -79,6 +79,7 @@ class GoldenLoader:
             'old_purchase_amount_max', 'new_hist_merchant_category_id_nunique', 'new_hist_purchase_amount_max',
             'pa_mean', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy', 'new_hist_month_lag_mean',
             'hist_purchase_amount_max', 'month_amount_skew', 'old_pa2_month_diff_mean', 'new_no_city_count',
+            "old_subsector_id_target_encode_mean", "old_merchant_id_target_encode_mean",
         ]
         dup_col_safe = [
             'old_purchase_amount_sum', 'pa_max', 'new_hist_purchase_amount_min', 'old_pa2_mean',
@@ -87,7 +88,8 @@ class GoldenLoader:
             'hist_month_nunique', 'hist_month_lag_mean', 'kh_hist_kh__purchase_active_secs_diff_max',
             'hist_weekofyear_nunique', 'old_not_auth_purchase_amount_max', 'new_hist_merchant_category_id_nunique',
             'new_hist_purchase_amount_max', 'kh_all_kh__purchase_active_secs_diff_max', 'hist_first_buy',
-            'new_hist_month_lag_mean', 'hist_purchase_amount_max', 'month_amount_skew', 'new_no_city_count'
+            'new_hist_month_lag_mean', 'hist_purchase_amount_max', 'month_amount_skew', 'new_no_city_count',
+            "old_subsector_id_target_encode_mean", "old_merchant_id_target_encode_mean",
         ]
         dup_col.append("outliers")
         dup_col_safe.append("outliers")

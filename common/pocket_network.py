@@ -151,6 +151,7 @@ class GoldenNetwork:
         model = Model(inputs=[trans_cat_in, trans_num_in, cat_in, num_in], output=op)
         print(model.summary())
         return model
+
 #
 #
 # def build_all_nn(time_steps=352, series_features=1, meta_features=7):

@@ -33,7 +33,7 @@ drop_col = [
     "old_installments_nunique", "new_installments_nunique",  # "pred_new_pur_max",
 ]
 try_col = [c for c in train.columns if c not in drop_col and c not in base_col]
-base_col_prob = [1.0, 0.9, 0.7, 0.5]
+base_col_prob = [1.0, 0.9]
 try_col_prob = [0.1, 0.3, 0.5, 0.7]
 
 train_y = train["target"]
