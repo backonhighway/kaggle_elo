@@ -37,13 +37,14 @@ base_col_prob = [1.0, 0.9]
 try_col_prob = [0.1, 0.3, 0.5, 0.7]
 
 train_y = train["target"]
+train_y = (train_y < -30).astype(int)
 outliers = (train["target"] < -30).astype(int).values
 split_num = 5
 skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_state=4590)
-lgb = pocket_lgb.GoldenLgb()
+lgb = pocket_lgb.AdversarialLgb()
 col_selector = random_col_selector.RandomColumnSelector(base_col, try_col, base_col_prob, try_col_prob)
 exp_log_list = list()
-for i in range(2):
+for i in range(100):
     exp_log = dict()
     exp_log["exp_idx"] = i
 

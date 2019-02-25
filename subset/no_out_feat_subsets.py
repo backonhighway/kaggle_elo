@@ -43,7 +43,7 @@ skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_s
 lgb = pocket_lgb.GoldenLgb()
 col_selector = random_col_selector.RandomColumnSelector(base_col, try_col, base_col_prob, try_col_prob)
 exp_log_list = list()
-for i in range(2):
+for i in range(10):
     exp_log = dict()
     exp_log["exp_idx"] = i
 
@@ -62,15 +62,18 @@ for i in range(2):
     train_cv["card_id"] = train["card_id"]
     train_cv["cv_pred"] = 0
 
+    no_out_idx = train[train["target"] > -33].index
     train_preds = []
     for train_index, test_index in skf.split(train, outliers):
-        X_train, X_test = train_x.iloc[train_index], train_x.iloc[test_index]
-        y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
+        _train_idx = [i for i in train_index if i in no_out_idx]
+        _test_idx = [i for i in test_index if i in no_out_idx]
+        X_train, X_test = train_x.iloc[_train_idx], train_x.iloc[_test_idx]
+        y_train, y_test = train_y.iloc[_train_idx], train_y.iloc[_test_idx]
 
         model = lgb.do_train_direct(X_train, X_test, y_train, y_test)
 
         y_pred = model.predict(test_x)
-        valid_set_pred = model.predict(X_test)
+        valid_set_pred = model.predict(train_x.iloc[test_index])
 
         submission["target"] = submission["target"] + y_pred
         train_id = train.iloc[test_index]
