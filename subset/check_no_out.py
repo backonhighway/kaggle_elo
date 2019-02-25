@@ -76,14 +76,15 @@ class GoldenLr:
         print(reg.coef_)
         sig_idx = list()
         for idx, coef in enumerate(reg.coef_):
-            if coef > 0.15:
-                sig_idx.append(idx)
-        print(sig_idx)
+            sig_idx.append((idx, coef))
+        sorted_idx = sorted(sig_idx, key=lambda tup: abs(tup[1]), reverse=True)
+        for i in sorted_idx:
+            print(i)
 
         y_pred = reg.predict(train_x)
         score = evaluator.rmse(train["target"], y_pred)
         print(score)
-        return sig_idx
+        return sorted_idx
 
         #
         # test_x = test[ensemble_col]

@@ -30,48 +30,16 @@ class GoldenLr:
         timer.time("corr check")
         self.print_score(train, files)
         timer.time("score check")
-        sig_idx = self.do_preds(train, files)
+        self.do_preds(train, files)
 
-        base_files = ["subset_exp_" + str(idx) for idx in sig_idx]
-        base_files = [(f, f) for f in base_files]
-        bin_files = ["subset_exp_" + str(idx) for idx in range(10)]
-        bin_files = [(f, "bin"+f) for f in bin_files]
-        train, test = self.make_files(base_files, bin_files)
-
-        files = base_files + bin_files
-        self.print_corr(train, test, files)
-        self.do_cv_pred(train, test, files)
-
-    def doit_fast(self):
-        sig_idx = [4, 6, 10, 16, 35, 39, 44, 50, 58, 61, 67, 69, 70, 74, 75, 77, 87, 88, 90, 96, 97]
-        base_files = ["subset_exp_" + str(idx) for idx in sig_idx]
-        base_files = [(f, f) for f in base_files]
-        bin_idx = [1, 2, 6, 7, 9]
-        bin_files = ["subset_exp_" + str(idx) for idx in bin_idx]
-        bin_files = [(f, "bin"+f) for f in bin_files]
-        no_out_idx = [0, 1, 4, 5, 7, 8]
-        no_out_files = ["subset_exp_" + str(idx) for idx in no_out_idx]
-        no_out_files = [(f, "no_out"+f) for f in no_out_files]
-        train, test = self.make_files(base_files, bin_files, no_out_files)
-
-        files = base_files + bin_files + no_out_files
-        self.print_corr(train, test, files)
-        self.do_cv_pred(train, test, files)
-
-    def make_files(self, base_files, bin_files=None, no_out_files=None):
+    def make_files(self, files):
         train = self.csv_io.read_file(path_const.ORG_TRAIN)
         train = train[["card_id", "target"]]
         test = self.csv_io.read_file(path_const.ORG_TEST)
         test = test[["card_id"]]
 
-        for f in base_files:
+        for f in files:
             train, test = self._add_file(f[0], f[1], "../output/subset_exp2/", train, test)
-        if bin_files is not None:
-            for f in bin_files:
-                train, test = self._add_file(f[0], f[1], "../output/subset_bin2/", train, test)
-        if no_out_files is not None:
-            for f in no_out_files:
-                train, test = self._add_file(f[0], f[1], "../output/subset_no_out2/", train, test)
         return train, test
 
     def _add_file(self, file_name, col_name, prefix, org_train, org_test):
@@ -108,14 +76,15 @@ class GoldenLr:
         print(reg.coef_)
         sig_idx = list()
         for idx, coef in enumerate(reg.coef_):
-            if coef > 0.15:
-                sig_idx.append(idx)
-        print(sig_idx)
+            sig_idx.append((idx, coef))
+        sorted_idx = sorted(sig_idx, key=lambda tup: abs(tup[1]), reverse=True)
+        for i in sorted_idx:
+            print(i)
 
         y_pred = reg.predict(train_x)
         score = evaluator.rmse(train["target"], y_pred)
         print(score)
-        return sig_idx
+        return sorted_idx
 
         #
         # test_x = test[ensemble_col]
@@ -176,7 +145,7 @@ class GoldenLr:
 
 
 obj = GoldenLr()
-obj.doit_fast()
+obj.doit()
 
 
 

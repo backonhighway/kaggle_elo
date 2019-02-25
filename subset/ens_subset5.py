@@ -40,23 +40,25 @@ class GoldenLr:
 
         files = base_files + bin_files
         self.print_corr(train, test, files)
+
         self.do_cv_pred(train, test, files)
 
     def doit_fast(self):
-        sig_idx = [4, 6, 10, 16, 35, 39, 44, 50, 58, 61, 67, 69, 70, 74, 75, 77, 87, 88, 90, 96, 97]
+        sig_idx = [67, 58, 4, 69, 86, 75, 90, 59, 89, 11, 39, 61, 96, 43, 0, 80, 97, 44, 23, 79]
         base_files = ["subset_exp_" + str(idx) for idx in sig_idx]
         base_files = [(f, f) for f in base_files]
-        bin_idx = [1, 2, 6, 7, 9]
+        bin_idx = [57, 76, 26, 69, 16, 96, 11, 88, 41, 67, 81, 25, 19, 85, 29, 6, 82, 8, 55, 32]
         bin_files = ["subset_exp_" + str(idx) for idx in bin_idx]
         bin_files = [(f, "bin"+f) for f in bin_files]
-        no_out_idx = [0, 1, 4, 5, 7, 8]
+        no_out_idx = [99, 74, 23, 69, 26, 33, 94, 73, 72, 95, 30, 21, 70, 49, 54, 60, 77, 79, 45, 89]
         no_out_files = ["subset_exp_" + str(idx) for idx in no_out_idx]
         no_out_files = [(f, "no_out"+f) for f in no_out_files]
         train, test = self.make_files(base_files, bin_files, no_out_files)
 
         files = base_files + bin_files + no_out_files
         self.print_corr(train, test, files)
-        self.do_cv_pred(train, test, files)
+        for i in range(20):
+            self.do_cv_pred(train, test, files, i)
 
     def make_files(self, base_files, bin_files=None, no_out_files=None):
         train = self.csv_io.read_file(path_const.ORG_TRAIN)
@@ -129,9 +131,11 @@ class GoldenLr:
         # sub.to_csv(path_const.OUTPUT_ENS, index=False)
 
     @staticmethod
-    def do_cv_pred(train, test, files):
+    def do_cv_pred(train, test, files, use_cols=10, verbose=False):
         print("------- do preds --------")
-        ensemble_col = [f[1] for f in files]
+        ensemble_col = [f[1] for i, f in enumerate(files) if (i % 20) <= use_cols]
+        if use_cols == 2:
+            print(ensemble_col)
         train_x = train[ensemble_col]
         test_x = test[ensemble_col]
         train_y = train["target"]
@@ -149,10 +153,11 @@ class GoldenLr:
             y_train, y_test = train_y.iloc[train_index], train_y.iloc[test_index]
 
             reg = BayesianRidge().fit(X_train, y_train)
-            print(reg.coef_)
             valid_set_pred = reg.predict(X_test)
             score = evaluator.rmse(y_test, valid_set_pred)
-            print(score)
+            if verbose:
+                print(reg.coef_)
+                print(score)
 
             y_pred = reg.predict(test_x)
             submission["target"] = submission["target"] + y_pred

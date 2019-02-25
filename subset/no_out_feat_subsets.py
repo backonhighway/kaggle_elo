@@ -43,7 +43,7 @@ skf = model_selection.StratifiedKFold(n_splits=split_num, shuffle=True, random_s
 lgb = pocket_lgb.GoldenLgb()
 col_selector = random_col_selector.RandomColumnSelector(base_col, try_col, base_col_prob, try_col_prob)
 exp_log_list = list()
-for i in range(10):
+for i in range(100):
     exp_log = dict()
     exp_log["exp_idx"] = i
 

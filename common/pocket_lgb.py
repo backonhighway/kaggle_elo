@@ -136,7 +136,7 @@ class AdversarialLgb(GoldenLgb):
                           lgb_train,
                           valid_sets=[lgb_eval],
                           verbose_eval=100,
-                          num_boost_round=300,
+                          num_boost_round=3000,
                           early_stopping_rounds=100,
                           categorical_feature=self.category_col)
         print('End training...')
