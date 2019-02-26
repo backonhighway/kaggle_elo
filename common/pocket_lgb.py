@@ -244,7 +244,7 @@ class RankLgb(GoldenLgb):
             'min_data_in_leaf': 30,
             'objective': 'lambdarank',
             'max_depth': -1,
-            'learning_rate': 0.01,
+            'learning_rate': 0.02,
             "boosting": "gbdt",
             "feature_fraction": 0.9,
             "bagging_freq": 1,
@@ -281,7 +281,7 @@ class RankLgb(GoldenLgb):
                           valid_sets=[lgb_eval],
                           verbose_eval=10,
                           num_boost_round=200,
-                          early_stopping_rounds=100,
+                          early_stopping_rounds=20,
                           categorical_feature=self.category_col)
         return model
 
