@@ -273,3 +273,9 @@ class GoldenLoader:
         #     'category_3_most', 'category_3_second_most', 'category_3_third_most',
         #     'first_active_month'
         # ]
+
+    @staticmethod
+    def load_pseudo_labels():
+        best_sub = pd.read_csv("../input/team/test_oof_linear13.csv")
+        return best_sub
+

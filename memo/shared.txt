@@ -1,0 +1,15 @@
+Perhaps you have discovered that outliers have a very strong impact on the accuracy of the model.
+The first thing I am worried about is whether the distribution of outliers of the switched data is consistent with the current one.
+So I have to declare it in advance, and I am very worried that my post-processing method will cause me to fit on the existing list.
+
+Yep, I am going to talk about my scoring skills at the end of the game(now), and I don't guarantee the stability of this method.
+My score improvement comes from three parts. The first part is the grouping combination of multiple sets of features.
+The framework is as follows:
+(original feature + original stitching + feature filtering after stitching + fixed 300 features and tuning) * (lgb single model /nn single model /xgb-lgb-nn-catboost-ridge's Repeat (base model of BayesRidge));
+the second part is to obtain two models for different models after obtaining 300 models, but I executed It is not "binary", but "rank:pairwise", making full use of the characteristics of "Recommend".
+After constructing the candidate set, you can fully interact with the -33 of the sample with the highest rank score.
+The third part, in fact, everyone has already Observed, -33 is actually log2(1e-10). Similarly, we can also find log(1e-n), n∈(1,10), and in this discrete interval, we can put the regression back.
+The value is corrected to a discrete value to reduce the prediction error. For example, we can correct the value of -31 to -33.
+
+In fact, the profit that rank:pairwise gives me is very high, but I have not found a very stable way to prevent overfitting in terms of threshold selection.
+If I am still in the gold medal area after switching data, I will share all my skills and handling in this question.
