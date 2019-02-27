@@ -76,7 +76,8 @@ class GoldenLr:
         ret_test = pd.merge(org_test, another_test, on="card_id", how="inner")
         return ret_train, ret_test
 
-    def add_team_file(self, file_name, col_name, org_train, org_test):
+    @staticmethod
+    def add_team_file(file_name, col_name, org_train, org_test):
         train_file_name = "../sub/" + file_name + "_oof_train"
         test_file_name = "../sub/" + file_name + "_oof_test"
         another_train = pd.read_pickle(train_file_name)

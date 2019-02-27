@@ -258,18 +258,18 @@ class RankLgb(GoldenLgb):
 
     def do_train_direct(self, x_train, x_test, y_train, y_test):
         print("start train")
-        # batch_size = 10000
-        # t_len = x_train.shape[0]
-        # g_train = [batch_size for _ in range(t_len // batch_size)]
-        # if t_len % batch_size != 0:
-        #     g_train = g_train + [t_len % batch_size]
-        #
-        # t_len = x_test.shape[0]
-        # g_test = [batch_size for _ in range(t_len // batch_size)]
-        # if t_len % batch_size != 0:
-        #     g_test = g_test + [t_len % batch_size]
-        g_train = [x_train.shape[0]]
-        g_test = [x_test.shape[0]]
+        batch_size = 10000
+        t_len = x_train.shape[0]
+        g_train = [batch_size for _ in range(t_len // batch_size)]
+        if t_len % batch_size != 0:
+            g_train = g_train + [t_len % batch_size]
+
+        t_len = x_test.shape[0]
+        g_test = [batch_size for _ in range(t_len // batch_size)]
+        if t_len % batch_size != 0:
+            g_test = g_test + [t_len % batch_size]
+        # g_train = [x_train.shape[0]]
+        # g_test = [x_test.shape[0]]
 
         # print(g_train)
         # print(g_test)
