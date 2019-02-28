@@ -19,7 +19,7 @@ class GoldenLr:
         timer = pocket_timer.GoldenTimer(logger)
 
         # (file_name, col_name)
-        files = ["subset_exp_" + str(idx) for idx in range(100)]
+        files = ["subset_exp_" + str(idx) for idx in range(40, 70)]
         files = [(f, f) for f in files]
 
         train, test = self.make_files(files)

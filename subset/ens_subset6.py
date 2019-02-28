@@ -43,14 +43,11 @@ class GoldenLr:
 
         self.do_cv_pred(train, test, files)
 
-    def doit_fast(self):
-        sig_idx = [67, 58, 4, 69, 86, 75, 90, 59, 89, 11]  # , 39, 61, 96, 43, 0, 80, 97, 44, 23, 79]
+    def doit_fast(self, sig_idx, bin_idx, no_out_idx):
         base_files = ["subset_exp_" + str(idx) for idx in sig_idx]
         base_files = [(f, f) for f in base_files]
-        bin_idx = [57, 76, 26, 69, 16, 96, 11, 88, 41, 67]  # , 81, 25, 19, 85, 29, 6, 82, 8, 55, 32]
         bin_files = ["subset_exp_" + str(idx) for idx in bin_idx]
         bin_files = [(f, "bin"+f) for f in bin_files]
-        no_out_idx = [99, 74, 23, 69, 26, 33, 94, 73, 72, 95]  # , 30, 21, 70, 49, 54, 60, 77, 79, 45, 89]
         no_out_files = ["subset_exp_" + str(idx) for idx in no_out_idx]
         no_out_files = [(f, "no_out"+f) for f in no_out_files]
         train, test = self.make_files(base_files, bin_files, no_out_files)
@@ -177,8 +174,29 @@ class GoldenLr:
         print(rmse_score)
 
 
+sig_idx = [67, 58, 4, 69, 86, 75, 90, 59, 89, 11]  # , 39, 61, 96, 43, 0, 80, 97, 44, 23, 79]
+bin_idx = [57, 76, 26, 69, 16]#, 96, 11, 88, 41, 67]  # , 81, 25, 19, 85, 29, 6, 82, 8, 55, 32]
+no_out_idx = [99, 74, 23, 69, 26]#, 33, 94, 73, 72, 95]  # , 30, 21, 70, 49, 54, 60, 77, 79, 45, 89]
+
+sig_idx = [4, 27, 9, 20, 18]#, 7, 22, 5, 13, 8]
+bin_idx = [6, 26, 18, 19, 7]#, 15, 20, 29, 11, 14]
+no_out_idx = [29, 4, 25, 3, 10]#, 18, 9, 24, 7, 2]
+sig_idx = [i+70 for i in sig_idx]
+bin_idx = [i+70 for i in bin_idx]
+no_out_idx = [i+70 for i in no_out_idx]
+# sig_idx = [i for i in range(70, 100)]
+# bin_idx = [i for i in range(10)]
+# no_out_idx = [i for i in range(10)]
+
+
+sig_idx = [27, 18, 29, 21, 10]
+bin_idx = [17, 29, 1, 27, 6]
+no_out_idx = [29, 14, 24, 9, 16]
+sig_idx = [i+40 for i in sig_idx]
+bin_idx = [i+40 for i in bin_idx]
+no_out_idx = [i+40 for i in no_out_idx]
 obj = GoldenLr()
-obj.doit_fast()
+obj.doit_fast(sig_idx, bin_idx, sig_idx)
 
 
 

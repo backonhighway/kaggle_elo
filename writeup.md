@@ -10,7 +10,9 @@ After merging with my team, we merged our features and re-run our models. Our be
 We searched for a good way to ensemble our models, but couldn't find a good way, especially with all the post-process that was going on.  
 Just one week before the deadline, @marcuslin finally found that a simple ridge including non-outlier model + binary-prediction model works really well. Our score jumped to the 3.66x range in public, which was 3.600 range in private.
 
-For our final submission, we were torn between 3subs. One with heavy post-process, one with conservative post-process, and one without post-process. We were pessimistic about our final position, so we took the risk and selected the two with post-process. This was actually a mistake, but still good enough for 18th place. 
+For our final submission, we were torn between 3subs. One with heavy post-process, one with conservative post-process, and one without post-process.  
+We were pessimistic about our final position, so we took the risk and selected the two with post-process. This was actually a mistake, but still good enough for 18th place.  
+Had we selected our no-post-process sub, we would have placed around 10th place, but that is just another story.
 
 I really feel lucky/happy about the final result, since in the heat of the competition, I could neither trust the CV nor could I trust the LB, which means I was flying blind.
 
